@@ -41,7 +41,7 @@ function initRobot() {
   };
 
   football = {
-    pos: [85, 198, 110],
+    pos: [28, 198, 120],
     radius: 20,
     velocity: [0, 0, 0],
   };
@@ -239,7 +239,7 @@ function tryKickBall(leg) {
   const footPos = getFootWorldPosition(leg);
   const dist = Vec3.distance(football.pos, footPos);
 
-  if (dist < football.radius + 28) {
+  if (dist < football.radius + 70) {
     const dir = Vec3.normalize([
       Math.sin(robot.yaw),
       -0.05,
@@ -303,25 +303,30 @@ function drawFootball() {
   const worldMesh = Mesh.transformed(robotMeshes.football, m);
 
   push();
-  applyMaterial("plastic");
-  Geometry.drawMesh(worldMesh, false);
+  const useTexture = applyMaterial("plastic", "plastic");
+  Geometry.drawMesh(worldMesh, useTexture);
   pop();
 }
 
 // ------------------------------------------------------------
 // DRAW HELPERS
 // ------------------------------------------------------------
-function drawPart(mesh, matrix, materialType = "metal") {
+function drawPart(
+  mesh,
+  matrix,
+  materialType = "metal",
+  textureType = materialType,
+) {
   const worldMesh = Mesh.transformed(mesh, matrix);
 
   push();
-  const useTexture = applyMaterial(materialType);
+  const useTexture = applyMaterial(materialType, textureType);
   Geometry.drawMesh(worldMesh, useTexture);
   pop();
 }
 
 function drawTorso(root) {
-  drawPart(robotMeshes.torso, root, "metal");
+  drawPart(robotMeshes.torso, root, "metal", "metal");
 
   const chestPanel = Mat4.compose(root, Mat4.translation(0, -10, 34));
   drawPanel(robotMeshes.chestPanel, chestPanel, "plastic", "glass");
@@ -329,7 +334,7 @@ function drawTorso(root) {
 
 function drawHead(root) {
   const neckBase = Mat4.compose(root, Mat4.translation(0, -88, 0));
-  drawPart(robotMeshes.neck, neckBase, "metal");
+  drawPart(robotMeshes.neck, neckBase, "metal", "metal");
 
   const headPivot = Mat4.compose(
     neckBase,
@@ -339,7 +344,7 @@ function drawHead(root) {
   );
 
   const head = Mat4.compose(headPivot, Mat4.translation(0, -22, 0));
-  drawPart(robotMeshes.head, head, "plastic");
+  drawPart(robotMeshes.head, head, "plastic", "plastic");
 
   const facePanel = Mat4.compose(head, Mat4.translation(0, -2, 27));
   drawPanel(robotMeshes.facePanel, facePanel, "plastic", "glass");
@@ -354,7 +359,7 @@ function drawArm(torsoMatrix, left) {
     torsoMatrix,
     Mat4.translation(56 * side, -42, 0),
   );
-  drawPart(robotMeshes.joint, shoulderMount, "metal");
+  drawPart(robotMeshes.joint, shoulderMount, "metal", "metal");
 
   // CORREÇÃO: braço anda para a frente/trás no eixo X
   const shoulderPivot = Mat4.compose(
@@ -363,22 +368,22 @@ function drawArm(torsoMatrix, left) {
   );
 
   const upperArm = Mat4.compose(shoulderPivot, Mat4.translation(0, 34, 0));
-  drawPart(robotMeshes.upperArm, upperArm, "metal");
+  drawPart(robotMeshes.upperArm, upperArm, "metal", "metal");
 
   const elbowMount = Mat4.compose(shoulderPivot, Mat4.translation(0, 68, 0));
-  drawPart(robotMeshes.joint, elbowMount, "metal");
+  drawPart(robotMeshes.joint, elbowMount, "metal", "metal");
 
   // CORREÇÃO: cotovelo dobra no mesmo plano do andar
   const elbowPivot = Mat4.compose(elbowMount, Mat4.rotateX(elbowAngle));
 
   const foreArm = Mat4.compose(elbowPivot, Mat4.translation(0, 30, 0));
-  drawPart(robotMeshes.foreArm, foreArm, "metal");
+  drawPart(robotMeshes.foreArm, foreArm, "metal", "metal");
 
   const wrist = Mat4.compose(elbowPivot, Mat4.translation(0, 60, 0));
-  drawPart(robotMeshes.joint, wrist, "metal");
+  drawPart(robotMeshes.joint, wrist, "metal", "metal");
 
   const handBase = Mat4.compose(wrist, Mat4.translation(0, 10, 0));
-  drawPart(robotMeshes.handBase, handBase, "plastic");
+  drawPart(robotMeshes.handBase, handBase, "plastic", "plastic");
 }
 
 function drawPanel(
@@ -386,16 +391,18 @@ function drawPanel(
   matrix,
   outerMaterial = "plastic",
   innerMaterial = "glass",
+  outerTexture = outerMaterial,
+  innerTexture = innerMaterial,
 ) {
   const outerWorld = Mesh.transformed(panelObj.shell, matrix);
   push();
-  let useTexture = applyMaterial(outerMaterial);
+  let useTexture = applyMaterial(outerMaterial, outerTexture);
   Geometry.drawMesh(outerWorld, useTexture);
   pop();
 
   const innerWorld = Mesh.transformed(panelObj.inner, matrix);
   push();
-  useTexture = applyMaterial(innerMaterial);
+  useTexture = applyMaterial(innerMaterial, innerTexture);
   Geometry.drawMesh(innerWorld, useTexture);
   pop();
 }
@@ -409,28 +416,28 @@ function drawLeg(pelvisMatrix, left) {
     pelvisMatrix,
     Mat4.translation(20 * side, 18, 0),
   );
-  drawPart(robotMeshes.joint, hipMount, "metal");
+  drawPart(robotMeshes.joint, hipMount, "metal", "metal");
 
   // CORREÇÃO: anca move perna para a frente/trás no eixo X
   const hipPivot = Mat4.compose(hipMount, Mat4.rotateX(hipAngle));
 
   const thigh = Mat4.compose(hipPivot, Mat4.translation(0, 38, 0));
-  drawPart(robotMeshes.thigh, thigh, "metal");
+  drawPart(robotMeshes.thigh, thigh, "metal", "metal");
 
   const kneeMount = Mat4.compose(hipPivot, Mat4.translation(0, 76, 0));
-  drawPart(robotMeshes.joint, kneeMount, "metal");
+  drawPart(robotMeshes.joint, kneeMount, "metal", "metal");
 
   // CORREÇÃO: joelho dobra no eixo X
   const kneePivot = Mat4.compose(kneeMount, Mat4.rotateX(kneeAngle));
 
   const shin = Mat4.compose(kneePivot, Mat4.translation(0, 36, 0));
-  drawPart(robotMeshes.shin, shin, "metal");
+  drawPart(robotMeshes.shin, shin, "metal", "metal");
 
   const ankle = Mat4.compose(kneePivot, Mat4.translation(0, 72, 0));
-  drawPart(robotMeshes.joint, ankle, "metal");
+  drawPart(robotMeshes.joint, ankle, "metal", "metal");
 
   const foot = Mat4.compose(ankle, Mat4.translation(0, 10, 8));
-  drawPart(robotMeshes.foot, foot, "leather");
+  drawPart(robotMeshes.foot, foot, "leather", "leather");
 }
 
 // ------------------------------------------------------------

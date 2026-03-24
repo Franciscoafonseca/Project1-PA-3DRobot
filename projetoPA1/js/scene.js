@@ -43,10 +43,14 @@ function setupSceneCamera() {
 }
 
 function setupSceneLights() {
-  ambientLight(18, 18, 22);
+  setupLighting();
+}
 
-  directionalLight(230, 230, 230, -0.55, -1.0, -0.25);
-  directionalLight(70, 72, 80, 0.6, -0.35, 0.2);
+function setupLighting() {
+  ambientLight(8, 8, 12);
+
+  directionalLight(255, 252, 240, -0.55, -1.0, -0.25);
+  directionalLight(90, 120, 200, 0.6, -0.35, 0.2);
 
   const spotPos = Scene.spotlightFollowRobot
     ? [robot.pos[0], robot.pos[1] - 200, robot.pos[2] + 250]
@@ -60,16 +64,16 @@ function setupSceneLights() {
 
   spotLight(
     255,
-    245,
     235,
+    200,
     spotPos[0],
     spotPos[1],
     spotPos[2],
     dir[0],
     dir[1],
     dir[2],
-    PI / 8,
-    25,
+    PI / 10,
+    45,
   );
 }
 

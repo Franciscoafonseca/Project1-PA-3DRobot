@@ -5,6 +5,7 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL);
   angleMode(RADIANS);
+  textureMode(NORMAL);
 
   initInput();
   initScene();
@@ -18,7 +19,7 @@ function draw() {
   updateRobot();
 
   setupSceneCamera();
-  setupSceneLights();
+  setupLighting();
 
   drawScene();
   drawRobot();

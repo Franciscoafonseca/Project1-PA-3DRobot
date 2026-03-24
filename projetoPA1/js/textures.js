@@ -19,44 +19,77 @@ function loadTextures() {
   Textures.skin = loadImage("assets/textures/pele.jpg");
 }
 
-function applyMaterial(type) {
+function applyTexture(type) {
+  switch (type) {
+    case "metal":
+      if (Textures.metal) {
+        texture(Textures.metal);
+        return true;
+      }
+      return false;
+    case "plastic":
+      if (Textures.plastic) {
+        texture(Textures.plastic);
+        return true;
+      }
+      return false;
+    case "leather":
+      if (Textures.leather) {
+        texture(Textures.leather);
+        return true;
+      }
+      return false;
+    case "glass":
+      if (Textures.glass) {
+        texture(Textures.glass);
+        return true;
+      }
+      return false;
+    case "skin":
+      if (Textures.skin) {
+        texture(Textures.skin);
+        return true;
+      }
+      return false;
+    default:
+      return false;
+  }
+}
+
+function applyMaterial(type, textureType = type) {
   noStroke();
+  const hasTexture = applyTexture(textureType);
 
   switch (type) {
     case "metal":
-      if (Textures.metal) texture(Textures.metal);
       ambientMaterial(165, 165, 170);
       specularMaterial(255, 255, 255);
       shininess(110);
-      return true;
+      return hasTexture;
 
     case "plastic":
-      if (Textures.plastic) texture(Textures.plastic);
       ambientMaterial(90, 95, 105);
       specularMaterial(150, 155, 165);
       shininess(22);
-      return true;
+      return hasTexture;
 
     case "leather":
-      if (Textures.leather) texture(Textures.leather);
       ambientMaterial(90, 60, 40);
       specularMaterial(140, 95, 70);
       shininess(28);
-      return true;
+      return hasTexture;
 
     case "glass":
-      if (Textures.glass) texture(Textures.glass);
       ambientMaterial(120, 180, 220);
       specularMaterial(255, 255, 255);
       shininess(150);
-      return true;
+      return hasTexture;
 
     case "skin":
-      if (Textures.skin) texture(Textures.skin);
       ambientMaterial(205, 175, 150);
       specularMaterial(120, 95, 85);
       shininess(10);
-      return true;
+      return hasTexture;
 
     case "wall":
       ambientMaterial(22, 24, 30);

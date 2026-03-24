@@ -53,6 +53,14 @@ function handleKeyPressed(k, keyCodeValue) {
     triggerKick("right");
   }
 
+  if (k === "f" || k === "F") {
+    triggerKick("left");
+  }
+
+  if (k === "g" || k === "G") {
+    triggerKick("right");
+  }
+
   if (k === "r" || k === "R") {
     resetRobotPose();
   }
