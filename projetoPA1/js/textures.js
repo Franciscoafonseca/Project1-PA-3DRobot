@@ -1,27 +1,22 @@
 // js/textures.js
 // ============================================================
-// CLEAN MATERIAL SYSTEM - NO IMAGE TEXTURES FOR NOW
+// FINAL TEXTURE SYSTEM - IMAGE BASED
 // ============================================================
 
 const Textures = {
   metal: null,
   plastic: null,
-  fabric: null,
   leather: null,
   glass: null,
   skin: null,
 };
 
 function loadTextures() {
-  // desligado temporariamente
-}
-
-function getTexture(name) {
-  return null;
-}
-
-function applyTexture(name) {
-  // desligado temporariamente
+  Textures.metal = loadImage("assets/textures/metal.jpg");
+  Textures.plastic = loadImage("assets/textures/plastico.png");
+  Textures.leather = loadImage("assets/textures/shoeslether.jpg");
+  Textures.glass = loadImage("assets/textures/vidro.png");
+  Textures.skin = loadImage("assets/textures/pele.jpg");
 }
 
 function applyMaterial(type) {
@@ -29,101 +24,64 @@ function applyMaterial(type) {
 
   switch (type) {
     case "metal":
-      ambientMaterial(150, 150, 155);
+      if (Textures.metal) texture(Textures.metal);
+      ambientMaterial(165, 165, 170);
       specularMaterial(255, 255, 255);
-      shininess(120);
-      break;
+      shininess(110);
+      return true;
 
     case "plastic":
-      ambientMaterial(55, 55, 65);
-      specularMaterial(110, 110, 120);
-      shininess(18);
-      break;
-
-    case "fabric":
-      ambientMaterial(70, 70, 75);
-      specularMaterial(25, 25, 25);
-      shininess(3);
-      break;
+      if (Textures.plastic) texture(Textures.plastic);
+      ambientMaterial(90, 95, 105);
+      specularMaterial(150, 155, 165);
+      shininess(22);
+      return true;
 
     case "leather":
-      ambientMaterial(55, 35, 25);
-      specularMaterial(95, 60, 40);
-      shininess(20);
-      break;
+      if (Textures.leather) texture(Textures.leather);
+      ambientMaterial(90, 60, 40);
+      specularMaterial(140, 95, 70);
+      shininess(28);
+      return true;
 
     case "glass":
-      ambientMaterial(80, 150, 190);
+      if (Textures.glass) texture(Textures.glass);
+      ambientMaterial(120, 180, 220);
       specularMaterial(255, 255, 255);
-      shininess(180);
-      break;
+      shininess(150);
+      return true;
 
     case "skin":
+      if (Textures.skin) texture(Textures.skin);
       ambientMaterial(205, 175, 150);
-      specularMaterial(110, 90, 80);
-      shininess(8);
-      break;
+      specularMaterial(120, 95, 85);
+      shininess(10);
+      return true;
 
     case "wall":
       ambientMaterial(22, 24, 30);
       specularMaterial(35, 38, 45);
       shininess(4);
-      break;
+      return false;
 
     case "floor":
       ambientMaterial(42, 44, 50);
       specularMaterial(80, 84, 90);
       shininess(14);
-      break;
+      return false;
 
     default:
       ambientMaterial(170, 170, 170);
       specularMaterial(90, 90, 90);
       shininess(10);
-      break;
+      return false;
   }
 }
 
 function applyEmissive(color = [0, 210, 255]) {
   noStroke();
-  emissiveMaterial(color[0], color[1], color[2]);
-}
-
-function applyRobotPartMaterial(part) {
-  switch (part) {
-    case "torso":
-    case "upperArm":
-    case "foreArm":
-    case "thigh":
-    case "shin":
-    case "joint":
-    case "neck":
-      applyMaterial("metal");
-      break;
-
-    case "head":
-    case "pelvis":
-    case "hand":
-      applyMaterial("plastic");
-      break;
-
-    case "foot":
-    case "shoe":
-      applyMaterial("leather");
-      break;
-
-    case "visor":
-    case "screen":
-      applyMaterial("glass");
-      break;
-
-    case "skin":
-    case "face":
-      applyMaterial("skin");
-      break;
-
-    default:
-      applyMaterial("metal");
-      break;
-  }
+  ambientMaterial(color[0], color[1], color[2]);
+  specularMaterial(255, 255, 255);
+  shininess(80);
+  return false;
 }
