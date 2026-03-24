@@ -48,6 +48,11 @@ function handleKeyPressed(k, keyCodeValue) {
   }
   Input.keys[keyCodeValue] = true;
 
+  if (k === "k" || k === "K") {
+    triggerKick("right");
+    Input.keys["k"] = false;
+  }
+
   // one-shot actions
   if (k === " " || keyCodeValue === 32) {
     triggerKick("right");
@@ -67,6 +72,18 @@ function handleKeyPressed(k, keyCodeValue) {
 
   if (k === "c" || k === "C") {
     Scene.spotlightFollowRobot = !Scene.spotlightFollowRobot;
+  }
+
+  if (k === "7") {
+    Scene.ambientEnabled = !Scene.ambientEnabled;
+  }
+
+  if (k === "8") {
+    Scene.sideSpotlightsEnabled = !Scene.sideSpotlightsEnabled;
+  }
+
+  if (k === "9") {
+    Scene.followSpotlightEnabled = !Scene.followSpotlightEnabled;
   }
 
   if (k === "p" || k === "P") {
@@ -153,7 +170,7 @@ function updateRobotJointInput() {
     robot.rightShoulder -= jointSpeed;
   }
 
-  // Elbows I / K
+  // Elbows I / K (K reservado para kick one-shot)
   if (isKeyDownChar("i")) {
     robot.leftElbow += jointSpeed;
     robot.rightElbow -= jointSpeed;
@@ -178,12 +195,12 @@ function updateRobotJointInput() {
   // Knees N / M
   if (isKeyDownChar("n")) {
     robot.leftKnee += jointSpeed;
-    robot.rightKnee -= jointSpeed;
+    robot.rightKnee += jointSpeed;
   }
 
   if (isKeyDownChar("m")) {
     robot.leftKnee -= jointSpeed;
-    robot.rightKnee += jointSpeed;
+    robot.rightKnee -= jointSpeed;
   }
 
   // Optional claw Z / X
@@ -258,8 +275,8 @@ function clampRobotJoints() {
   robot.leftHip = clampValue(robot.leftHip, -0.8, 0.8);
   robot.rightHip = clampValue(robot.rightHip, -0.8, 0.8);
 
-  robot.leftKnee = clampValue(robot.leftKnee, -0.05, 1.0);
-  robot.rightKnee = clampValue(robot.rightKnee, -1.0, 0.05);
+  robot.leftKnee = clampValue(robot.leftKnee, 0, 1.05);
+  robot.rightKnee = clampValue(robot.rightKnee, 0, 1.05);
 
   if (robot.leftClaw !== undefined && robot.rightClaw !== undefined) {
     robot.leftClaw = clampValue(robot.leftClaw, 0.05, 0.8);

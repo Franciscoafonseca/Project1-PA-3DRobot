@@ -12,10 +12,13 @@ let football = null;
 // ------------------------------------------------------------
 function initRobot() {
   robot = {
-    pos: [0, -105, 0],
+    pos: [0, -48, 0],
     yaw: 0,
 
     torsoLean: 0,
+    torsoTwist: 0,
+    kickOffsetX: 0,
+    kickOffsetZ: 0,
     headYaw: 0,
     headPitch: 0,
 
@@ -28,6 +31,9 @@ function initRobot() {
     rightHip: 0,
     leftKnee: 0,
     rightKnee: 0,
+
+    leftAnkle: 0,
+    rightAnkle: 0,
 
     moving: false,
     idle: true,
@@ -91,6 +97,7 @@ function applyIdleAnimation() {
   const t = millis() * 0.0015;
 
   robot.torsoLean = Math.sin(t * 1.5) * 0.012;
+  robot.torsoTwist = lerpValue(robot.torsoTwist, Math.sin(t * 1.2) * 0.015, 0.08);
   robot.headPitch = Math.sin(t * 1.1) * 0.015;
 
   robot.leftShoulder = lerpValue(
@@ -156,6 +163,7 @@ function applyWalkAnimation() {
   );
 
   robot.torsoLean = lerpValue(robot.torsoLean, 0.03, 0.12);
+  robot.torsoTwist = lerpValue(robot.torsoTwist, -Math.sin(robot.walkPhase) * 0.08, 0.18);
   robot.headPitch = lerpValue(
     robot.headPitch,
     Math.sin(robot.walkPhase * 2.0) * 0.01,
@@ -174,79 +182,153 @@ function triggerKick(leg = "right") {
 function updateKickAnimation() {
   if (!robot.kickActive) return;
 
-  robot.kickPhase += 0.08;
-  const t = robot.kickPhase;
+  robot.kickPhase += 0.06;
+  const t = clampUnit(robot.kickPhase);
 
-  robot.torsoLean = lerpValue(robot.torsoLean, 0.05, 0.14);
-  robot.headPitch = lerpValue(robot.headPitch, -0.02, 0.12);
+  const kickLeg = robot.kickingLeg === "right" ? "right" : "left";
+  const supportLeg = kickLeg === "right" ? "left" : "right";
+  const kickSign = kickLeg === "right" ? 1 : -1;
 
-  if (robot.kickingLeg === "right") {
-    // perna esquerda suporta
-    robot.leftHip = lerpValue(robot.leftHip, -0.08, 0.12);
-    robot.leftKnee = lerpValue(robot.leftKnee, 0.08, 0.12);
-
-    if (t < 0.38) {
-      // levantar coxa
-      robot.rightHip = lerpValue(robot.rightHip, -0.55, 0.24);
-      robot.rightKnee = lerpValue(robot.rightKnee, 0.7, 0.24);
-    } else if (t < 0.72) {
-      // extensão do remate
-      robot.rightHip = lerpValue(robot.rightHip, 0.42, 0.3);
-      robot.rightKnee = lerpValue(robot.rightKnee, 0.08, 0.3);
-
-      if (!robot.ballAlreadyKicked) {
-        tryKickBall("right");
-        robot.ballAlreadyKicked = true;
-      }
+  // Fases do remate: 0-0.3 prepara, 0.3-0.6 acelera, 0.6-0.9 follow-through
+  function setLeg(leg, hipTarget, kneeTarget, ankleTarget, speed = 0.26) {
+    if (leg === "right") {
+      robot.rightHip = lerpValue(robot.rightHip, hipTarget, speed);
+      robot.rightKnee = lerpValue(robot.rightKnee, kneeTarget, speed);
+      robot.rightAnkle = lerpValue(robot.rightAnkle, ankleTarget, speed);
     } else {
-      robot.rightHip = lerpValue(robot.rightHip, 0, 0.18);
-      robot.rightKnee = lerpValue(robot.rightKnee, 0, 0.18);
-      robot.leftHip = lerpValue(robot.leftHip, 0, 0.18);
-      robot.leftKnee = lerpValue(robot.leftKnee, 0, 0.18);
-    }
-  } else {
-    // perna direita suporta
-    robot.rightHip = lerpValue(robot.rightHip, -0.08, 0.12);
-    robot.rightKnee = lerpValue(robot.rightKnee, 0.08, 0.12);
-
-    if (t < 0.38) {
-      robot.leftHip = lerpValue(robot.leftHip, -0.55, 0.24);
-      robot.leftKnee = lerpValue(robot.leftKnee, 0.7, 0.24);
-    } else if (t < 0.72) {
-      robot.leftHip = lerpValue(robot.leftHip, 0.42, 0.3);
-      robot.leftKnee = lerpValue(robot.leftKnee, 0.08, 0.3);
-
-      if (!robot.ballAlreadyKicked) {
-        tryKickBall("left");
-        robot.ballAlreadyKicked = true;
-      }
-    } else {
-      robot.leftHip = lerpValue(robot.leftHip, 0, 0.18);
-      robot.leftKnee = lerpValue(robot.leftKnee, 0, 0.18);
-      robot.rightHip = lerpValue(robot.rightHip, 0, 0.18);
-      robot.rightKnee = lerpValue(robot.rightKnee, 0, 0.18);
+      robot.leftHip = lerpValue(robot.leftHip, hipTarget, speed);
+      robot.leftKnee = lerpValue(robot.leftKnee, kneeTarget, speed);
+      robot.leftAnkle = lerpValue(robot.leftAnkle, ankleTarget, speed);
     }
   }
 
-  if (robot.kickPhase >= 1.1) {
+  // tronco e braços: contra-balanço para parecer remate humano
+  const prepEnd = 0.30;
+  const impactEnd = 0.58;
+  const followEnd = 0.86;
+
+  const kickProgress =
+    t < prepEnd
+      ? 0
+      : t < impactEnd
+        ? (t - prepEnd) / (impactEnd - prepEnd)
+        : 1;
+
+  const bodyLean = t < prepEnd ? -0.04 : t < impactEnd ? 0.15 : 0.08;
+  const bodyTwist =
+    t < prepEnd
+      ? -0.22 * kickSign
+      : t < impactEnd
+        ? 0.3 * kickSign
+        : 0.14 * kickSign;
+
+  // transferência de peso + pequeno passo de ataque
+  const sideShift =
+    t < prepEnd
+      ? lerpValue(0, -8 * kickSign, easeInOutCubic(t / prepEnd))
+      : t < impactEnd
+        ? lerpValue(-8 * kickSign, 5 * kickSign, easeOutQuart((t - prepEnd) / (impactEnd - prepEnd)))
+        : lerpValue(5 * kickSign, 0, easeInOutCubic((t - impactEnd) / (1 - impactEnd)));
+
+  const forwardStep =
+    t < prepEnd
+      ? lerpValue(0, -7, easeInOutCubic(t / prepEnd))
+      : t < impactEnd
+        ? lerpValue(-7, 15, easeOutQuart((t - prepEnd) / (impactEnd - prepEnd)))
+        : lerpValue(15, 0, easeInOutCubic((t - impactEnd) / (1 - impactEnd)));
+
+  robot.kickOffsetX = sideShift;
+  robot.kickOffsetZ = forwardStep;
+
+  robot.torsoLean = lerpValue(robot.torsoLean, bodyLean, 0.2);
+  robot.torsoTwist = lerpValue(robot.torsoTwist, bodyTwist, 0.22);
+  robot.headPitch = lerpValue(robot.headPitch, -0.04 + kickProgress * 0.04, 0.16);
+
+  // braço oposto abre no impacto, braço do lado do remate fecha
+  if (kickLeg === "right") {
+    robot.rightShoulder = lerpValue(robot.rightShoulder, -0.32, 0.2);
+    robot.leftShoulder = lerpValue(robot.leftShoulder, 0.46, 0.2);
+    robot.rightElbow = lerpValue(robot.rightElbow, 0.34, 0.18);
+    robot.leftElbow = lerpValue(robot.leftElbow, 0.12, 0.18);
+  } else {
+    robot.leftShoulder = lerpValue(robot.leftShoulder, 0.32, 0.2);
+    robot.rightShoulder = lerpValue(robot.rightShoulder, -0.46, 0.2);
+    robot.leftElbow = lerpValue(robot.leftElbow, 0.34, 0.18);
+    robot.rightElbow = lerpValue(robot.rightElbow, 0.12, 0.18);
+  }
+
+  // perna de apoio: flexão progressiva para absorver peso
+  const supportHip = -0.07 - Math.sin(t * Math.PI) * 0.07;
+  const supportKnee = 0.16 + Math.sin(t * Math.PI) * 0.16;
+  setLeg(supportLeg, supportHip, supportKnee, -0.06, 0.22);
+
+  // biomecânica do remate (coxa e joelho em fases)
+
+  if (t < prepEnd) {
+    const p = easeInOutCubic(t / prepEnd);
+    const hip = lerpValue(0, -0.36, p);
+    const knee = lerpValue(0, 0.88, p);
+    const ankle = lerpValue(0, -0.22, p);
+    setLeg(kickLeg, hip, knee, ankle, 0.34);
+  } else if (t < impactEnd) {
+    const p = easeOutQuart((t - prepEnd) / (impactEnd - prepEnd));
+    const hip = lerpValue(-0.36, 0.92, p);
+    const knee = lerpValue(0.88, 0.02, p);
+    const ankle = lerpValue(-0.22, 0.42, p);
+    setLeg(kickLeg, hip, knee, ankle, 0.4);
+
+    if (!robot.ballAlreadyKicked && t > 0.52) {
+      tryKickBall(kickLeg, p);
+      robot.ballAlreadyKicked = true;
+    }
+  } else if (t < followEnd) {
+    const p = easeInOutCubic((t - impactEnd) / (followEnd - impactEnd));
+    const hip = lerpValue(0.92, 0.34, p);
+    const knee = lerpValue(0.02, 0.34, p);
+    const ankle = lerpValue(0.42, 0.08, p);
+    setLeg(kickLeg, hip, knee, ankle, 0.24);
+  } else {
+    const p = easeInOutCubic((t - followEnd) / (1.0 - followEnd));
+    const hip = lerpValue(0.32, 0, p);
+    const knee = lerpValue(0.28, 0, p);
+    const ankle = lerpValue(0.1, 0, p);
+    setLeg(kickLeg, hip, knee, ankle, 0.24);
+    setLeg(supportLeg, 0, 0, 0, 0.22);
+  }
+
+  if (robot.kickPhase >= 1.0) {
     robot.kickActive = false;
     robot.kickPhase = 0;
     robot.ballAlreadyKicked = false;
+
+    robot.torsoTwist = lerpValue(robot.torsoTwist, 0, 0.35);
+    robot.kickOffsetX = 0;
+    robot.kickOffsetZ = 0;
+    robot.leftShoulder = lerpValue(robot.leftShoulder, -0.08, 0.26);
+    robot.rightShoulder = lerpValue(robot.rightShoulder, 0.08, 0.26);
+    robot.leftElbow = lerpValue(robot.leftElbow, 0.18, 0.2);
+    robot.rightElbow = lerpValue(robot.rightElbow, 0.18, 0.2);
   }
 }
 
-function tryKickBall(leg) {
+function tryKickBall(leg, impactPhase = 1) {
   const footPos = getFootWorldPosition(leg);
-  const dist = Vec3.distance(football.pos, footPos);
+  const ballToFoot = Vec3.sub(football.pos, footPos);
+  const dist = Vec3.length(ballToFoot);
+  const kickSign = leg === "right" ? 1 : -1;
 
-  if (dist < football.radius + 70) {
+  if (dist < football.radius + 74) {
     const dir = Vec3.normalize([
-      Math.sin(robot.yaw),
-      -0.05,
-      Math.cos(robot.yaw),
+      Math.sin(robot.yaw + robot.torsoTwist * 0.55) + kickSign * 0.08,
+      -0.22,
+      Math.cos(robot.yaw + robot.torsoTwist * 0.55),
     ]);
 
-    football.velocity = [dir[0] * 8.0, -1.0, dir[2] * 8.0];
+    const contactBoost = clampUnit((football.radius + 74 - dist) / 28);
+    const power = 8.4 + impactPhase * 3.4 + contactBoost * 2.2;
+    const lift = 2.1 + impactPhase * 1.5;
+
+    football.velocity = [dir[0] * power, -lift, dir[2] * power];
   }
 }
 
@@ -279,8 +361,13 @@ function drawRobot() {
   if (!robot || !robotMeshes) return;
 
   const root = Mat4.compose(
-    Mat4.translation(robot.pos[0], robot.pos[1], robot.pos[2]),
+    Mat4.translation(
+      robot.pos[0] + robot.kickOffsetX,
+      robot.pos[1],
+      robot.pos[2] + robot.kickOffsetZ,
+    ),
     Mat4.rotateY(robot.yaw),
+    Mat4.rotateY(robot.torsoTwist),
     Mat4.rotateX(robot.torsoLean),
   );
 
@@ -321,6 +408,42 @@ function drawPart(
 
   push();
   const useTexture = applyMaterial(materialType, textureType);
+  Geometry.drawMesh(worldMesh, useTexture);
+  pop();
+}
+
+function getLoadedTexture(textureType) {
+  const globalScope = typeof globalThis !== "undefined" ? globalThis : window;
+
+  if (textureType === "metal" && globalScope.imgMetal) return globalScope.imgMetal;
+  if (textureType === "plastic" && globalScope.imgPlastic)
+    return globalScope.imgPlastic;
+  if (textureType === "glass" && globalScope.imgLed) return globalScope.imgLed;
+
+  if (typeof Textures !== "undefined" && Textures[textureType]) {
+    return Textures[textureType];
+  }
+
+  return null;
+}
+
+function drawPartUV(
+  mesh,
+  matrix,
+  materialType = "metal",
+  textureType = materialType,
+) {
+  const worldMesh = Mesh.transformed(mesh, matrix);
+
+  push();
+  applyMaterial(materialType, textureType);
+
+  const imageTex = getLoadedTexture(textureType);
+  if (imageTex) {
+    texture(imageTex);
+  }
+
+  const useTexture = !!imageTex && mesh.uvs && mesh.uvs.length > 0;
   Geometry.drawMesh(worldMesh, useTexture);
   pop();
 }
@@ -411,6 +534,7 @@ function drawLeg(pelvisMatrix, left) {
   const side = left ? -1 : 1;
   const hipAngle = left ? robot.leftHip : robot.rightHip;
   const kneeAngle = left ? robot.leftKnee : robot.rightKnee;
+  const ankleAngle = left ? robot.leftAnkle : robot.rightAnkle;
 
   const hipMount = Mat4.compose(
     pelvisMatrix,
@@ -422,22 +546,24 @@ function drawLeg(pelvisMatrix, left) {
   const hipPivot = Mat4.compose(hipMount, Mat4.rotateX(hipAngle));
 
   const thigh = Mat4.compose(hipPivot, Mat4.translation(0, 38, 0));
-  drawPart(robotMeshes.thigh, thigh, "metal", "metal");
+  drawPartUV(robotMeshes.thigh, thigh, "metal", "metal");
 
   const kneeMount = Mat4.compose(hipPivot, Mat4.translation(0, 76, 0));
   drawPart(robotMeshes.joint, kneeMount, "metal", "metal");
 
   // CORREÇÃO: joelho dobra no eixo X
-  const kneePivot = Mat4.compose(kneeMount, Mat4.rotateX(kneeAngle));
+  const kneePivot = Mat4.compose(kneeMount, Mat4.rotateX(-kneeAngle));
 
   const shin = Mat4.compose(kneePivot, Mat4.translation(0, 36, 0));
-  drawPart(robotMeshes.shin, shin, "metal", "metal");
+  drawPartUV(robotMeshes.shin, shin, "metal", "metal");
 
   const ankle = Mat4.compose(kneePivot, Mat4.translation(0, 72, 0));
   drawPart(robotMeshes.joint, ankle, "metal", "metal");
 
-  const foot = Mat4.compose(ankle, Mat4.translation(0, 10, 8));
-  drawPart(robotMeshes.foot, foot, "leather", "leather");
+  const ankleRot = Mat4.compose(ankle, Mat4.rotateX(ankleAngle));
+
+  const foot = Mat4.compose(ankleRot, Mat4.translation(0, 10, 8));
+  drawPartUV(robotMeshes.foot, foot, "plastic", "plastic");
 }
 
 // ------------------------------------------------------------
@@ -448,10 +574,16 @@ function getFootWorldPosition(leg) {
   const side = left ? -1 : 1;
   const hipAngle = left ? robot.leftHip : robot.rightHip;
   const kneeAngle = left ? robot.leftKnee : robot.rightKnee;
+  const ankleAngle = left ? robot.leftAnkle : robot.rightAnkle;
 
   const root = Mat4.compose(
-    Mat4.translation(robot.pos[0], robot.pos[1], robot.pos[2]),
+    Mat4.translation(
+      robot.pos[0] + robot.kickOffsetX,
+      robot.pos[1],
+      robot.pos[2] + robot.kickOffsetZ,
+    ),
     Mat4.rotateY(robot.yaw),
+    Mat4.rotateY(robot.torsoTwist),
     Mat4.rotateX(robot.torsoLean),
   );
 
@@ -459,9 +591,10 @@ function getFootWorldPosition(leg) {
   const hipMount = Mat4.compose(pelvis, Mat4.translation(20 * side, 18, 0));
   const hipPivot = Mat4.compose(hipMount, Mat4.rotateX(hipAngle));
   const kneeMount = Mat4.compose(hipPivot, Mat4.translation(0, 76, 0));
-  const kneePivot = Mat4.compose(kneeMount, Mat4.rotateX(kneeAngle));
+  const kneePivot = Mat4.compose(kneeMount, Mat4.rotateX(-kneeAngle));
   const ankle = Mat4.compose(kneePivot, Mat4.translation(0, 72, 0));
-  const footMatrix = Mat4.compose(ankle, Mat4.translation(0, 10, 8));
+  const ankleRot = Mat4.compose(ankle, Mat4.rotateX(ankleAngle));
+  const footMatrix = Mat4.compose(ankleRot, Mat4.translation(0, 10, 8));
 
   return Mat4.transformPoint(footMatrix, [0, 6, 12]);
 }
@@ -480,7 +613,13 @@ function resetRobotPose() {
   robot.leftKnee = 0;
   robot.rightKnee = 0;
 
+  robot.leftAnkle = 0;
+  robot.rightAnkle = 0;
+
   robot.torsoLean = 0;
+  robot.torsoTwist = 0;
+  robot.kickOffsetX = 0;
+  robot.kickOffsetZ = 0;
   robot.kickActive = false;
   robot.kickPhase = 0;
   robot.ballAlreadyKicked = false;
@@ -488,4 +627,19 @@ function resetRobotPose() {
 
 function lerpValue(a, b, t) {
   return a + (b - a) * t;
+}
+
+function clampUnit(v) {
+  return Math.max(0, Math.min(1, v));
+}
+
+function easeInOutCubic(t) {
+  if (t < 0.5) return 4 * t * t * t;
+  const f = -2 * t + 2;
+  return 1 - (f * f * f) / 2;
+}
+
+function easeOutQuart(t) {
+  const f = 1 - t;
+  return 1 - f * f * f * f;
 }

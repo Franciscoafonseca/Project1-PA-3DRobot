@@ -62,27 +62,27 @@ function applyMaterial(type, textureType = type) {
 
   switch (type) {
     case "metal":
-      ambientMaterial(165, 165, 170);
+      ambientMaterial(150, 152, 160);
       specularMaterial(255, 255, 255);
-      shininess(110);
+      shininess(190);
       return hasTexture;
 
     case "plastic":
-      ambientMaterial(90, 95, 105);
-      specularMaterial(150, 155, 165);
-      shininess(22);
+      ambientMaterial(92, 98, 108);
+      specularMaterial(95, 100, 110);
+      shininess(10);
       return hasTexture;
 
     case "leather":
-      ambientMaterial(90, 60, 40);
-      specularMaterial(140, 95, 70);
-      shininess(28);
+      ambientMaterial(88, 58, 40);
+      specularMaterial(55, 40, 28);
+      shininess(5);
       return hasTexture;
 
     case "glass":
       ambientMaterial(120, 180, 220);
       specularMaterial(255, 255, 255);
-      shininess(150);
+      shininess(220);
       return hasTexture;
 
     case "skin":

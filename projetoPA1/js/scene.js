@@ -11,6 +11,9 @@ const Scene = {
     targetHeight: 40,
   },
 
+  ambientEnabled: true,
+  sideSpotlightsEnabled: true,
+  followSpotlightEnabled: true,
   spotlightFollowRobot: true,
 };
 
@@ -47,33 +50,97 @@ function setupSceneLights() {
 }
 
 function setupLighting() {
-  ambientLight(8, 8, 12);
+  if (Scene.ambientEnabled) {
+    ambientLight(24, 24, 30);
+  }
 
-  directionalLight(255, 252, 240, -0.55, -1.0, -0.25);
-  directionalLight(90, 120, 200, 0.6, -0.35, 0.2);
+  if (Scene.sideSpotlightsEnabled) {
+    const leftSpotPos = [-560, -280, 80];
+    const rightSpotPos = [560, -280, -80];
+
+    const leftTarget = [-80, 70, 120];
+    const rightTarget = [80, 70, 120];
+
+    const leftDir = Vec3.normalize(Vec3.sub(leftTarget, leftSpotPos));
+    const rightDir = Vec3.normalize(Vec3.sub(rightTarget, rightSpotPos));
+
+    spotLight(
+      160,
+      170,
+      235,
+      leftSpotPos[0],
+      leftSpotPos[1],
+      leftSpotPos[2],
+      leftDir[0],
+      leftDir[1],
+      leftDir[2],
+      PI / 7,
+      34,
+    );
+
+    spotLight(
+      235,
+      195,
+      165,
+      rightSpotPos[0],
+      rightSpotPos[1],
+      rightSpotPos[2],
+      rightDir[0],
+      rightDir[1],
+      rightDir[2],
+      PI / 7,
+      34,
+    );
+  }
+
+  const robotPos = robot ? robot.pos : [0, 0, 0];
+  const robotYaw = robot ? robot.yaw : 0;
+  const forward = [Math.sin(robotYaw), 0, Math.cos(robotYaw)];
+  const right = [Math.cos(robotYaw), 0, -Math.sin(robotYaw)];
+
+  if (!Scene.followSpotlightEnabled) return;
 
   const spotPos = Scene.spotlightFollowRobot
-    ? [robot.pos[0], robot.pos[1] - 200, robot.pos[2] + 250]
+    ? [
+        robotPos[0] - forward[0] * 200 + right[0] * 95,
+        robotPos[1] - 230,
+        robotPos[2] - forward[2] * 200 + right[2] * 95,
+      ]
     : [0, -250, 340];
 
-  const spotTarget = Scene.spotlightFollowRobot
-    ? [robot.pos[0], robot.pos[1] + 15, robot.pos[2]]
-    : [0, 20, 0];
+  const kickTarget =
+    robot && robot.kickActive
+      ? getFootWorldPosition(robot.kickingLeg || "right")
+      : null;
+
+  const spotTarget = kickTarget
+    ? [kickTarget[0], kickTarget[1] - 8, kickTarget[2]]
+    : Scene.spotlightFollowRobot
+      ? [
+          robotPos[0] + forward[0] * 120,
+          robotPos[1] - 20,
+          robotPos[2] + forward[2] * 120,
+        ]
+      : [0, 20, 0];
 
   const dir = Vec3.normalize(Vec3.sub(spotTarget, spotPos));
 
+  const spotColor = robot && robot.kickActive ? [255, 245, 215] : [255, 235, 200];
+  const spotCone = robot && robot.kickActive ? PI / 14 : PI / 10;
+  const spotConcentration = robot && robot.kickActive ? 85 : 45;
+
   spotLight(
-    255,
-    235,
-    200,
+    spotColor[0],
+    spotColor[1],
+    spotColor[2],
     spotPos[0],
     spotPos[1],
     spotPos[2],
     dir[0],
     dir[1],
     dir[2],
-    PI / 10,
-    45,
+    spotCone,
+    spotConcentration,
   );
 }
 
