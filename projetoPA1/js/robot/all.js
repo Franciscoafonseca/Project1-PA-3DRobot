@@ -60,10 +60,7 @@ function initRobot() {
 function buildRobotMeshes() {
   robotMeshes = {
     torso: Geometry.makeChest(86, 112, 48),
-
-    pelvis: Geometry.makePelvisAdvanced(92, 38, 54),
-    shorts: Geometry.makeShortsAdvanced(82, 24, 42),
-
+    shorts: Geometry.makeShortsAdvanced(70, 35, 33),
     head: Geometry.makeRobotHead(52, 46, 42),
     neck: Geometry.makeCapsuleY(7, 14, 12, 4),
 
@@ -81,12 +78,12 @@ function buildRobotMeshes() {
     fingerJoint: Geometry.makeFingerJoint(1.08, 2.0, 12),
 
     // legs
-    hipJoint: Geometry.makeHipJoint(7.8, 14, 11),
-    thigh: Geometry.makeThighHumanized(11.5, 62),
-    knee: Geometry.makeKneeHumanized(8.5, 7.0, 8.2),
-    shin: Geometry.makeShinHumanized(8.6, 5.8, 60),
-    foot: Geometry.makeFootballBootProfile(36, 12, 16),
 
+    hipJoint: Geometry.makeHipJoint(8.4, 15, 12),
+    thigh: Geometry.makeThighHumanized(13.5, 58),
+    knee: Geometry.makeKneeHumanized(9.2, 8.2, 9.0),
+    shin: Geometry.makeShinHumanized(9.4, 6.6, 58),
+    foot: Geometry.makeFootballBootProfile(36, 15.5, 13.5),
     football: Geometry.makeFootball(football.radius),
   };
 }
@@ -103,7 +100,6 @@ function drawRobot() {
   );
 
   const pelvisMatrix = Mat4.compose(root, Mat4.translation(0, 84, 0));
-  drawPelvis(pelvisMatrix);
   drawLowerBody(pelvisMatrix);
 
   const torsoMatrix = root;

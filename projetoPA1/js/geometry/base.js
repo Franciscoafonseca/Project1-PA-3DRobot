@@ -968,6 +968,146 @@ Geometry.makeSoftFingerSegment = function (
   );
 };
 
+Geometry.makeRoundedTrapezoidPrism = function (
+  topWidth = 20,
+  bottomWidth = 16,
+  height = 20,
+  depth = 18,
+  cornerRadius = 2.2,
+  widthSegments = 10,
+  heightSegments = 6,
+  depthCurve = 1.2,
+) {
+  const vertices = [];
+  const triangles = [];
+  const uvs = [];
+
+  function roundedRectPoints(w, d, r, segments = 3) {
+    const hw = w * 0.5;
+    const hd = d * 0.5;
+    const rr = Math.min(r, hw * 0.45, hd * 0.45);
+
+    const pts = [];
+
+    function arc(cx, cz, start, end) {
+      for (let i = 0; i <= segments; i++) {
+        const t = i / segments;
+        const a = start + (end - start) * t;
+        pts.push([cx + Math.cos(a) * rr, cz + Math.sin(a) * rr]);
+      }
+    }
+
+    // começa no canto superior direito e segue no sentido horário
+    arc(hw - rr, hd - rr, -Math.PI * 0.5, 0.0); // top-right
+    arc(hw - rr, -hd + rr, 0.0, Math.PI * 0.5); // bottom-right
+    arc(-hw + rr, -hd + rr, Math.PI * 0.5, Math.PI); // bottom-left
+    arc(-hw + rr, hd - rr, Math.PI, Math.PI * 1.5); // top-left
+
+    // remover duplicados consecutivos
+    const clean = [];
+    for (let i = 0; i < pts.length; i++) {
+      const p = pts[i];
+      const prev = clean[clean.length - 1];
+      if (
+        !prev ||
+        Math.abs(prev[0] - p[0]) > 1e-6 ||
+        Math.abs(prev[1] - p[1]) > 1e-6
+      ) {
+        clean.push(p);
+      }
+    }
+
+    return clean;
+  }
+
+  const ringTemplate = roundedRectPoints(
+    topWidth,
+    depth,
+    cornerRadius,
+    Math.max(2, Math.floor(widthSegments / 4)),
+  );
+  const ringSize = ringTemplate.length;
+
+  for (let iy = 0; iy <= heightSegments; iy++) {
+    const v = iy / heightSegments;
+
+    // topo mais largo, base mais estreita
+    const width = topWidth + (bottomWidth - topWidth) * v;
+
+    // ligeira redução da profundidade em baixo para parecer tecido
+    const localDepth = depth * (1.0 - 0.1 * v);
+
+    // ligeiro bojo frontal a meio
+    const frontBulge = Math.sin(v * Math.PI) * depthCurve;
+
+    // ligeira curva vertical: frente cai mais do que atrás
+    const y = -height * 0.5 + v * height;
+
+    const ring = roundedRectPoints(
+      width,
+      localDepth,
+      cornerRadius,
+      Math.max(2, Math.floor(widthSegments / 4)),
+    );
+
+    for (let i = 0; i < ring.length; i++) {
+      const p = ring[i];
+      const x = p[0];
+      let z = p[1];
+
+      // empurra só a parte da frente para fora para dar volume
+      if (z > 0) {
+        const frontFactor = z / (localDepth * 0.5);
+        z += frontBulge * frontFactor;
+      }
+
+      vertices.push([x, y, z]);
+      uvs.push([i / (ring.length - 1), v]);
+    }
+  }
+
+  function idx(iy, ix) {
+    return iy * ringSize + (ix % ringSize);
+  }
+
+  // lados
+  for (let iy = 0; iy < heightSegments; iy++) {
+    for (let ix = 0; ix < ringSize; ix++) {
+      const a = idx(iy, ix);
+      const b = idx(iy, ix + 1);
+      const c = idx(iy + 1, ix + 1);
+      const d = idx(iy + 1, ix);
+
+      triangles.push([a, b, c]);
+      triangles.push([a, c, d]);
+    }
+  }
+
+  // tampa de cima
+  const topCenterIndex = vertices.length;
+  vertices.push([0, -height * 0.5, 0]);
+  uvs.push([0.5, 0.5]);
+
+  for (let ix = 0; ix < ringSize; ix++) {
+    const a = idx(0, ix);
+    const b = idx(0, ix + 1);
+    triangles.push([topCenterIndex, b, a]);
+  }
+
+  // tampa de baixo
+  const bottomCenterIndex = vertices.length;
+  vertices.push([0, height * 0.5, 0]);
+  uvs.push([0.5, 0.5]);
+
+  for (let ix = 0; ix < ringSize; ix++) {
+    const a = idx(heightSegments, ix);
+    const b = idx(heightSegments, ix + 1);
+    triangles.push([bottomCenterIndex, a, b]);
+  }
+
+  return Mesh.create(vertices, triangles, uvs);
+};
+
 Geometry.makeCapsuleLimb = function (
   height = 60,
   radiusTopX = 14,
@@ -1083,7 +1223,10 @@ Geometry.drawMesh = function (mesh, useTexture = false) {
     const c = mesh.vertices[tri[2]];
 
     const n = Geo.triangleNormal(a, b, c);
-    normal(n[0], n[1], n[2]);
+
+    // ligeira suavização artificial
+    const len = Math.hypot(n[0], n[1], n[2]) || 1;
+    normal(n[0] / len, n[1] / len, n[2] / len);
 
     if (useTexture && mesh.uvs && mesh.uvs.length > 0) {
       const uva = mesh.uvs[tri[0]] || [0, 0];

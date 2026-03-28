@@ -112,13 +112,15 @@ function applyMaterial(type) {
       if (Textures.shorts) {
         texture(Textures.shorts);
         ambientMaterial(240, 240, 240);
-        specularMaterial(85, 85, 85);
-        shininess(6);
+        // REMOVE specular
+        // specularMaterial(85, 85, 85);
+        // shininess(6);
         return true;
       }
       ambientMaterial(240, 240, 240);
-      specularMaterial(85, 85, 85);
-      shininess(6);
+      // REMOVE specular
+      // specularMaterial(85, 85, 85);
+      // shininess(6);
       return false;
 
     case "sock":
