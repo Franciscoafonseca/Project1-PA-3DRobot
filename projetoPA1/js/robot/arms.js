@@ -13,7 +13,7 @@ function drawArm(torsoMatrix, left) {
 
   const shoulderMount = Mat4.compose(
     torsoMatrix,
-    Mat4.translation(49 * side, -36, 0),
+    Mat4.translation(44 * side, -30, 0),
   );
 
   drawPart(robotMeshes.shoulder, shoulderMount, "skin");

@@ -58,64 +58,30 @@ Geometry.makeRobotHead = function (width = 52, height = 46, depth = 42) {
   return Geometry.mergeMeshes([shell, brow, cheekL, cheekR, jaw]);
 };
 
-Geometry.makeChest = function (width = 86, height = 112, depth = 48) {
+Geometry.makeChest = function (width = 76, height = 106, depth = 40) {
   const core = Geometry.makeRoundedTaperedPrism(
-    width * 0.9,
-    width,
+    width * 0.96,
+    width * 0.84,
     height,
-    depth * 0.92,
-    depth,
-    8,
+    depth * 0.98,
+    depth * 0.82,
+    7.5,
     28,
   );
 
-  const breastplate = Mesh.transformed(
+  const collarBase = Mesh.transformed(
     Geometry.makeRoundedRectPrism(
-      width * 0.7,
-      height * 0.34,
-      depth * 0.16,
-      8,
+      width * 0.22,
+      height * 0.08,
+      depth * 0.2,
       5,
-    ),
-    Mat4.translation(0, -height * 0.16, depth * 0.34),
-  );
-
-  const abdomen = Mesh.transformed(
-    Geometry.makeRoundedRectPrism(
-      width * 0.46,
-      height * 0.2,
-      depth * 0.12,
-      6,
       4,
     ),
-    Mat4.translation(0, height * 0.18, depth * 0.32),
+    Mat4.translation(0, -height * 0.49, 0),
   );
 
-  const sideL = Mesh.transformed(
-    Geometry.makeRoundedRectPrism(
-      width * 0.12,
-      height * 0.36,
-      depth * 0.22,
-      4,
-      4,
-    ),
-    Mat4.translation(-width * 0.38, -height * 0.06, depth * 0.05),
-  );
-
-  const sideR = Mesh.transformed(
-    Geometry.makeRoundedRectPrism(
-      width * 0.12,
-      height * 0.36,
-      depth * 0.22,
-      4,
-      4,
-    ),
-    Mat4.translation(width * 0.38, -height * 0.06, depth * 0.05),
-  );
-
-  return Geometry.mergeMeshes([core, breastplate, abdomen, sideL, sideR]);
+  return Geometry.mergeMeshes([core, collarBase]);
 };
-
 // ----------------------------------------------------------
 // ARM SYSTEM
 // ----------------------------------------------------------
