@@ -6,13 +6,14 @@ function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL);
   angleMode(RADIANS);
   textureMode(NORMAL);
+
   initInput();
-  initScene();
   initRobot();
+  initScene();
 }
 
 function draw() {
-  background(6, 8, 14);
+  background(20, 30, 58);
 
   updateInput();
   updateRobot();

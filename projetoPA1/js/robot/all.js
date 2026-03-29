@@ -59,19 +59,13 @@ function initRobot() {
 function buildRobotMeshes() {
   robotMeshes = {
     torso: Geometry.makeChest(76, 106, 40),
-    pecL: Geometry.makeRoundedRectPrism(22, 14, 5, 4, 4),
-    pecR: Geometry.makeRoundedRectPrism(22, 14, 5, 4, 4),
-    sternum: Geometry.makeRoundedRectPrism(5, 18, 5, 3, 4),
+    pecL: Geometry.makeRoundedRectPrism(34, 28, 10, 5, 4),
+    pecR: Geometry.makeRoundedRectPrism(34, 28, 10, 5, 4),
 
-    upperAbs: Geometry.makeRoundedRectPrism(12, 6, 5, 4, 4),
-    midAbs: Geometry.makeRoundedRectPrism(11, 5.5, 5, 4, 4),
-    lowerAbs: Geometry.makeRoundedRectPrism(13, 6, 5, 4, 4),
+    upperAbs: Geometry.makeRoundedRectPrism(20, 10, 5.2, 4, 4),
+    midAbs: Geometry.makeRoundedRectPrism(18, 10, 5.0, 4, 4),
+    lowerAbs: Geometry.makeRoundedRectPrism(16, 10, 4.8, 4, 4),
 
-    sideTorsoL: Geometry.makeRoundedRectPrism(6, 24, 6, 3, 4),
-    sideTorsoR: Geometry.makeRoundedRectPrism(6, 24, 6, 3, 4),
-
-    waistBridge: Geometry.makeRoundedRectPrism(52, 8, 18, 5, 4),
-    waistBridge: Geometry.makeRoundedRectPrism(54, 8, 20, 5, 4),
     shorts: Geometry.makeShortsAdvanced(70, 35, 33),
 
     head: Geometry.makeRobotHead(52, 46, 42),
@@ -87,10 +81,11 @@ function buildRobotMeshes() {
 
     facePanel: Geometry.makeRoundedPanel(22, 12, 3.2, 2.8, 0.12),
 
-    backPanel: Geometry.makeBeveledPanel(28, 34, 3.6, 3.0, 0.16, 5),
+    backPanel: Geometry.makeBeveledPanel(38, 50, 4.4, 3.8, 0.18, 5),
 
-    backDigitH: Geometry.makeRoundedRectPrism(9, 2.4, 1.8, 1.0, 3),
-    backDigitV: Geometry.makeRoundedRectPrism(2.4, 9, 1.8, 1.0, 3),
+    backDigitH: Geometry.makeRoundedRectPrism(12, 3.4, 2.6, 1.2, 3),
+    backDigitV: Geometry.makeRoundedRectPrism(3.4, 12, 2.6, 1.2, 3),
+
     eyeLed: Geometry.makeRoundedRectPrism(6, 3, 2, 1.2, 3),
 
     neckRing: Geometry.makeCapsuleY(11, 6, 24, 6),

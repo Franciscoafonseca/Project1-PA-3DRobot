@@ -74,14 +74,16 @@ function applyMaterial(type) {
     case "glass":
       if (Textures.glass) {
         texture(Textures.glass);
-        ambientMaterial(120, 180, 220);
+        ambientMaterial(80, 160, 255);
+        emissiveMaterial(90, 180, 255);
         specularMaterial(255, 255, 255);
-        shininess(150);
+        shininess(22);
         return true;
       }
-      ambientMaterial(120, 180, 220);
+      ambientMaterial(80, 160, 255);
+      emissiveMaterial(90, 180, 255);
       specularMaterial(255, 255, 255);
-      shininess(150);
+      shininess(22);
       return false;
 
     case "skin":
@@ -161,6 +163,62 @@ function applyMaterial(type) {
       shininess(14);
       return false;
 
+    case "grass":
+      if (Textures.grass) {
+        texture(Textures.grass);
+        ambientMaterial(165, 165, 165);
+        specularMaterial(16, 18, 16);
+        shininess(2);
+        return true;
+      }
+      ambientMaterial(44, 120, 58);
+      specularMaterial(16, 18, 16);
+      shininess(2);
+      return false;
+
+    case "stadium":
+      ambientMaterial(70, 72, 78);
+      specularMaterial(60, 60, 68);
+      shininess(4);
+      return false;
+
+    case "floodlight":
+      ambientMaterial(210, 210, 215);
+      specularMaterial(255, 255, 255);
+      shininess(24);
+      return false;
+
+    case "led":
+      ambientMaterial(110, 210, 255);
+      emissiveMaterial(100, 200, 255);
+      specularMaterial(255, 255, 255);
+      shininess(20);
+      return false;
+
+    case "floodlight_body":
+      ambientMaterial(170, 172, 178);
+      specularMaterial(255, 255, 255);
+      shininess(22);
+      return false;
+
+    case "floodlight_led":
+      ambientMaterial(255, 248, 220);
+      emissiveMaterial(255, 245, 210);
+      specularMaterial(255, 255, 255);
+      shininess(28);
+      return false;
+
+    case "skywall":
+      ambientMaterial(30, 36, 52);
+      specularMaterial(10, 10, 14);
+      shininess(2);
+      return false;
+
+    case "stand":
+      ambientMaterial(178, 178, 182);
+      specularMaterial(80, 80, 85);
+      shininess(4);
+      return false;
     default:
       ambientMaterial(170, 170, 170);
       specularMaterial(90, 90, 90);
