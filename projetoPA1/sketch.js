@@ -6,7 +6,7 @@ function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL);
   angleMode(RADIANS);
   textureMode(NORMAL);
-
+  setupTextureSystem();
   initInput();
   initRobot();
   initScene();

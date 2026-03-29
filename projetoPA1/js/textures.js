@@ -1,10 +1,11 @@
 // js/textures.js
 // ============================================================
-// FINAL TEXTURE SYSTEM - IMAGE BASED
+// TEXTURE SYSTEM - SIMPLIFIED / REUSABLE
 // ============================================================
 
 const Textures = {
   metal: null,
+  metaldelado: null,
   plastic: null,
   leather: null,
   glass: null,
@@ -13,20 +14,31 @@ const Textures = {
   shorts: null,
   sock: null,
   boots: null,
+
+  grass: null,
+  cimento: null,
 };
 
 function loadTextures() {
-  Textures.metal = loadImage("assets/textures/metal.jpg"); //
-  Textures.plastic = loadImage("assets/textures/plastico.png"); //
-  Textures.leather = loadImage("assets/textures/shoeslether.jpg"); //
-  Textures.glass = loadImage("assets/textures/vidro.png"); //
-  Textures.skin = loadImage("assets/textures/skin.jpg"); //
-  Textures.metaldelado = loadImage("assets/textures/metal-pattern.jpg"); //
-
-  Textures.jersey = loadImage("assets/textures/tecido.jpg"); //
+  // robot / props
+  Textures.metal = loadImage("assets/textures/metal.jpg");
+  Textures.metaldelado = loadImage("assets/textures/metal-pattern.jpg");
+  Textures.plastic = loadImage("assets/textures/plastico.png");
+  Textures.leather = loadImage("assets/textures/shoeslether.jpg");
+  Textures.glass = loadImage("assets/textures/vidro.png");
+  Textures.skin = loadImage("assets/textures/skin.jpg");
+  Textures.jersey = loadImage("assets/textures/tecido.jpg");
   Textures.shorts = loadImage("assets/textures/shorts.jpg");
   Textures.sock = loadImage("assets/textures/sock.png");
   Textures.boots = loadImage("assets/textures/lether.jpg");
+
+  // cenário
+  Textures.grass = loadImage("assets/textures/relva.jpg");
+  Textures.cimento = loadImage("assets/textures/cimento.jpg");
+}
+
+function setupTextureSystem() {
+  textureWrap(REPEAT, REPEAT);
 }
 
 function applyMaterial(type) {
@@ -49,13 +61,20 @@ function applyMaterial(type) {
     case "plastic":
       if (Textures.plastic) {
         texture(Textures.plastic);
-
-        noStroke();
+        ambientMaterial(255, 255, 255);
+        specularMaterial(100, 100, 100);
+        shininess(18);
         return true;
       }
       ambientMaterial(90, 95, 105);
       specularMaterial(150, 155, 165);
       shininess(22);
+      return false;
+
+    case "seat":
+      ambientMaterial(0, 57, 164);
+      specularMaterial(55, 55, 65);
+      shininess(6);
       return false;
 
     case "leather":
@@ -89,12 +108,12 @@ function applyMaterial(type) {
     case "skin":
       if (Textures.skin) {
         texture(Textures.skin);
-        noStroke();
+        ambientMaterial(255, 255, 255);
+        specularMaterial(35, 35, 35);
+        shininess(4);
         return true;
       }
-      ambientMaterial(165, 165, 170);
-      specularMaterial(255, 255, 255);
-      shininess(110);
+      ambientMaterial(220, 190, 170);
       return false;
 
     case "jersey":
@@ -114,15 +133,9 @@ function applyMaterial(type) {
       if (Textures.shorts) {
         texture(Textures.shorts);
         ambientMaterial(240, 240, 240);
-        // REMOVE specular
-        // specularMaterial(85, 85, 85);
-        // shininess(6);
         return true;
       }
       ambientMaterial(240, 240, 240);
-      // REMOVE specular
-      // specularMaterial(85, 85, 85);
-      // shininess(6);
       return false;
 
     case "sock":
@@ -151,83 +164,73 @@ function applyMaterial(type) {
       shininess(26);
       return false;
 
-    case "wall":
-      ambientMaterial(22, 24, 30);
-      specularMaterial(35, 38, 45);
-      shininess(4);
-      return false;
-
-    case "floor":
-      ambientMaterial(42, 44, 50);
-      specularMaterial(80, 84, 90);
-      shininess(14);
-      return false;
-
     case "grass":
       if (Textures.grass) {
         texture(Textures.grass);
-        ambientMaterial(165, 165, 165);
-        specularMaterial(16, 18, 16);
+        ambientMaterial(255, 255, 255);
+        specularMaterial(18, 18, 18);
         shininess(2);
         return true;
       }
-      ambientMaterial(44, 120, 58);
-      specularMaterial(16, 18, 16);
-      shininess(2);
+      ambientMaterial(70, 150, 70);
       return false;
 
-    case "stadium":
-      ambientMaterial(70, 72, 78);
-      specularMaterial(60, 60, 68);
-      shininess(4);
-      return false;
-
-    case "floodlight":
-      ambientMaterial(210, 210, 215);
-      specularMaterial(255, 255, 255);
-      shininess(24);
-      return false;
-
-    case "led":
-      ambientMaterial(110, 210, 255);
-      emissiveMaterial(100, 200, 255);
-      specularMaterial(255, 255, 255);
-      shininess(20);
+    case "cimento":
+      if (Textures.cimento) {
+        texture(Textures.cimento);
+        ambientMaterial(210, 210, 210);
+        specularMaterial(35, 35, 35);
+        shininess(3);
+        return true;
+      }
+      ambientMaterial(180, 180, 185);
+      specularMaterial(40, 40, 45);
+      shininess(3);
       return false;
 
     case "floodlight_body":
+      if (Textures.metaldelado) {
+        texture(Textures.metaldelado);
+        ambientMaterial(190, 190, 195);
+        specularMaterial(255, 255, 255);
+        shininess(70);
+        return true;
+      }
+      if (Textures.metal) {
+        texture(Textures.metal);
+        ambientMaterial(180, 180, 185);
+        specularMaterial(255, 255, 255);
+        shininess(60);
+        return true;
+      }
       ambientMaterial(170, 172, 178);
       specularMaterial(255, 255, 255);
       shininess(22);
       return false;
 
     case "floodlight_led":
-      ambientMaterial(255, 248, 220);
-      emissiveMaterial(255, 245, 210);
-      specularMaterial(255, 255, 255);
-      shininess(28);
-      return false;
-
-    case "skywall":
-      ambientMaterial(30, 36, 52);
-      specularMaterial(10, 10, 14);
-      shininess(2);
-      return false;
-    case "stand":
-      ambientMaterial(188, 188, 194);
-      specularMaterial(90, 90, 95);
-      shininess(5);
+      ambientMaterial(245, 245, 235);
+      specularMaterial(180, 180, 160);
+      shininess(22);
       return false;
 
     case "stand_front":
-      ambientMaterial(160, 160, 168);
-      specularMaterial(70, 70, 75);
-      shininess(4);
+      if (Textures.cimento) {
+        texture(Textures.cimento);
+        ambientMaterial(215, 215, 215);
+        specularMaterial(25, 25, 25);
+        shininess(2);
+        return true;
+      }
+      ambientMaterial(180, 180, 185);
+      specularMaterial(40, 40, 45);
+      shininess(3);
       return false;
-    case "stand":
-      ambientMaterial(178, 178, 182);
-      specularMaterial(80, 80, 85);
-      shininess(4);
+
+    case "corner_flag_pole":
+      ambientMaterial(245, 245, 245);
+      specularMaterial(90, 90, 90);
+      shininess(18);
       return false;
 
     default:
@@ -236,12 +239,4 @@ function applyMaterial(type) {
       shininess(10);
       return false;
   }
-}
-
-function applyEmissive(color = [0, 210, 255]) {
-  noStroke();
-  ambientMaterial(color[0], color[1], color[2]);
-  specularMaterial(255, 255, 255);
-  shininess(80);
-  return false;
 }

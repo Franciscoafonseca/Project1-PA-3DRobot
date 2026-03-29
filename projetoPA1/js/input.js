@@ -8,7 +8,7 @@ const Input = {
   keys: Object.create(null),
 
   config: {
-    moveSpeed: 2.4,
+    moveSpeed: 10,
     rotateSpeed: 0.03,
     jointSpeed: 0.025,
     headSpeed: 0.02,
