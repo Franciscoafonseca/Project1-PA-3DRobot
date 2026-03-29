@@ -31,7 +31,7 @@ function loadTextures() {
   Textures.shorts = loadImage("assets/textures/shorts.jpg");
   Textures.sock = loadImage("assets/textures/sock.png");
   Textures.boots = loadImage("assets/textures/lether.jpg");
-
+  Textures.hair = loadImage("assets/textures/cabelo.jpg");
   // cenário
   Textures.grass = loadImage("assets/textures/relva.jpg");
   Textures.cimento = loadImage("assets/textures/cimento.jpg");
@@ -231,6 +231,15 @@ function applyMaterial(type) {
       ambientMaterial(245, 245, 245);
       specularMaterial(90, 90, 90);
       shininess(18);
+      return false;
+    case "hair":
+      if (Textures.hair) {
+        texture(Textures.hair);
+        specularMaterial(255);
+        shininess(18);
+        return true;
+      }
+      ambientMaterial(70, 70, 70);
       return false;
 
     default:

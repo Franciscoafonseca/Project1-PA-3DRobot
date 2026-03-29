@@ -68,25 +68,39 @@ function buildRobotMeshes() {
 
     shorts: Geometry.makeShortsAdvanced(70, 35, 33),
 
-    head: Geometry.makeRobotHead(52, 46, 42),
-    neck: Geometry.makeRoundedTaperedPrism(
-      10, // topo
-      16, // base
-      20, // altura
-      10, // depth topo
-      14, // depth base
-      4.2,
-      20,
+    // ---------------- HEAD ----------------
+    head: Geometry.makeStylizedRobotHead(52, 48, 44),
+    neck: Geometry.makeRoundedTaperedPrism(10, 16, 20, 10, 14, 4.2, 20),
+
+    visor: Geometry.makeRoundedPanel(32, 10, 2.8, 3.0, 0.1),
+
+    eyeLed: Geometry.makeRoundedRectPrism(15, 6.2, 4, 1.2, 3),
+
+    nose: Geometry.makeRoundedTaperedPrism(4.5, 7.0, 8.0, 3.0, 4.2, 3.2, 16),
+
+    moustache: Geometry.makeRoundedTrapezoidPrism(
+      15.0,
+      12.0,
+      4.0,
+      2.0,
+      0.8,
+      8,
+      4,
+      0.2,
     ),
 
-    facePanel: Geometry.makeRoundedPanel(22, 12, 3.2, 2.8, 0.12),
+    ear: Geometry.makeRobotEar(7.5, 11, 7.5),
+
+    // estrutura do mullet a preencher a zona toda
+    hairTopBar: Geometry.makeRoundedRectPrism(24, 7, 40, 1.8, 4),
+    hairBackBar: Geometry.makeRoundedRectPrism(24, 50, 12, 1.8, 4),
+    hairSideL: Geometry.makeRoundedRectPrism(4.2, 26, 18, 1.5, 4),
+    hairSideR: Geometry.makeRoundedRectPrism(4.2, 26, 18, 1.5, 4),
 
     backPanel: Geometry.makeBeveledPanel(38, 50, 4.4, 3.8, 0.18, 5),
 
     backDigitH: Geometry.makeRoundedRectPrism(12, 3.4, 2.6, 1.2, 3),
     backDigitV: Geometry.makeRoundedRectPrism(3.4, 12, 2.6, 1.2, 3),
-
-    eyeLed: Geometry.makeRoundedRectPrism(6, 3, 2, 1.2, 3),
 
     neckRing: Geometry.makeCapsuleY(11, 6, 24, 6),
 
