@@ -68,11 +68,11 @@ function setupSceneLights() {
   directionalLight(150, 160, 180, -0.25, -1.0, -0.15);
   directionalLight(65, 75, 95, 0.45, -0.35, 0.2);
 
-  const target = [0, Scene.floorY - 20, -930];
+  const target = [0, Scene.floorY - 40, -980];
 
   const floodlights = [
-    [-900, -260, -700],
-    [900, -260, -700],
+    [-1250, -320, -760],
+    [1250, -320, -760],
   ];
 
   for (const pos of floodlights) {
@@ -133,16 +133,17 @@ function drawSceneMesh(mesh, matrix, materialType = "stadium") {
   pop();
 }
 function drawPitchHalf() {
-  const halfW = 1100;
-  const halfD = 1450;
+  const halfW = 1500;
+  const nearZ = 850;
+  const farZ = -1450;
   const y = Scene.floorY;
 
   const pitchMesh = Mesh.create(
     [
-      [-halfW, y, -halfD],
-      [halfW, y, -halfD],
-      [halfW, y, 650],
-      [-halfW, y, 650],
+      [-halfW, y, farZ],
+      [halfW, y, farZ],
+      [halfW, y, nearZ],
+      [-halfW, y, nearZ],
     ],
     [
       [0, 1, 2],
@@ -150,9 +151,9 @@ function drawPitchHalf() {
     ],
     [
       [0, 0],
-      [10, 0],
-      [10, 16],
-      [0, 16],
+      [14, 0],
+      [14, 20],
+      [0, 20],
     ],
   );
 
@@ -164,30 +165,30 @@ function drawPitchHalf() {
 function drawPenaltyAreaLines() {
   const y = Scene.floorY - 0.6;
 
-  const halfW = 980;
-  const endZ = -1100;
+  const halfW = 1320;
+  const endZ = -1180;
 
   stroke(245, 245, 245);
   strokeWeight(3);
 
   // linhas laterais visíveis
-  line(-halfW, y, 560, -halfW, y, endZ);
-  line(halfW, y, 560, halfW, y, endZ);
+  line(-halfW, y, 780, -halfW, y, endZ);
+  line(halfW, y, 780, halfW, y, endZ);
 
   // linha de fundo
   line(-halfW, y, endZ, halfW, y, endZ);
 
   // grande área
-  drawGroundRectFromBack(y, 0, endZ + 300, 860, 300);
+  drawGroundRectFromBack(y, 0, endZ + 360, 1040, 360);
 
   // pequena área
-  drawGroundRectFromBack(y, 0, endZ + 120, 420, 120);
+  drawGroundRectFromBack(y, 0, endZ + 150, 500, 150);
 
   // marca de penálti
-  drawGroundCircle(0, y, endZ + 420, 5, 20);
+  drawGroundCircle(0, y, endZ + 500, 5, 20);
 
-  // arco da área, centrado na marca de penálti
-  drawGroundArc(0, y, endZ + 420, 145, PI * 0.14, PI * 0.86, 40);
+  // arco
+  drawGroundArc(0, y, endZ + 500, 170, PI * 0.14, PI * 0.86, 44);
 
   noStroke();
 }
@@ -316,8 +317,8 @@ function drawStands() {
 }
 function drawFloodlightRigs() {
   const rigs = [
-    [-900, -260, -700, 0.55],
-    [900, -260, -700, -0.55],
+    [-1250, -320, -760, 0.38],
+    [1250, -320, -760, -0.38],
   ];
 
   stroke(185, 185, 190);
@@ -332,7 +333,6 @@ function drawFloodlightRigs() {
 
   noStroke();
 }
-
 function drawFloodlightPanel(x, y, z, yaw = 0) {
   const frame = Mat4.compose(Mat4.translation(x, y, z), Mat4.rotateY(yaw));
   drawSceneMesh(sceneMeshes.floodlightFrame, frame, "floodlight_body");
@@ -353,7 +353,7 @@ function drawFloodlightPanel(x, y, z, yaw = 0) {
       const lampMatrix = Mat4.compose(
         Mat4.translation(x, y, z),
         Mat4.rotateY(yaw),
-        Mat4.translation(lx, ly, -15),
+        Mat4.translation(lx, ly, 15), // <- era -15
         Mat4.rotateX(Math.PI / 2),
       );
 
@@ -362,16 +362,17 @@ function drawFloodlightPanel(x, y, z, yaw = 0) {
   }
 }
 function drawGoal() {
-  const goalZ = -1100;
+  const goalZ = -1180;
   const y = Scene.floorY;
 
-  const postHalfWidth = 320;
-  const goalHeight = 240;
-  const goalDepth = 150;
-  const backSpread = 90;
+  // ainda maior
+  const postHalfWidth = 620;
+  const goalHeight = 420;
+  const goalDepth = 320;
+  const backSpread = 220;
 
   stroke(248, 248, 248);
-  strokeWeight(7);
+  strokeWeight(9);
 
   // frente
   line(-postHalfWidth, y, goalZ, -postHalfWidth, y - goalHeight, goalZ);
@@ -385,14 +386,14 @@ function drawGoal() {
     goalZ,
   );
 
-  // profundidade
+  // profundidade para TRÁS
   line(
     -postHalfWidth,
     y,
     goalZ,
     -postHalfWidth - backSpread,
     y,
-    goalZ - goalDepth,
+    goalZ + goalDepth,
   );
   line(
     postHalfWidth,
@@ -400,7 +401,7 @@ function drawGoal() {
     goalZ,
     postHalfWidth + backSpread,
     y,
-    goalZ - goalDepth,
+    goalZ + goalDepth,
   );
 
   line(
@@ -409,7 +410,7 @@ function drawGoal() {
     goalZ,
     -postHalfWidth - backSpread,
     y - goalHeight,
-    goalZ - goalDepth,
+    goalZ + goalDepth,
   );
   line(
     postHalfWidth,
@@ -417,86 +418,154 @@ function drawGoal() {
     goalZ,
     postHalfWidth + backSpread,
     y - goalHeight,
-    goalZ - goalDepth,
+    goalZ + goalDepth,
   );
 
   // trás
   line(
     -postHalfWidth - backSpread,
     y,
-    goalZ - goalDepth,
+    goalZ + goalDepth,
     -postHalfWidth - backSpread,
     y - goalHeight,
-    goalZ - goalDepth,
+    goalZ + goalDepth,
   );
   line(
     postHalfWidth + backSpread,
     y,
-    goalZ - goalDepth,
+    goalZ + goalDepth,
     postHalfWidth + backSpread,
     y - goalHeight,
-    goalZ - goalDepth,
+    goalZ + goalDepth,
   );
   line(
     -postHalfWidth - backSpread,
     y - goalHeight,
-    goalZ - goalDepth,
+    goalZ + goalDepth,
     postHalfWidth + backSpread,
     y - goalHeight,
-    goalZ - goalDepth,
+    goalZ + goalDepth,
   );
 
   // rede
-  strokeWeight(1.5);
+  strokeWeight(1.8);
   stroke(230, 230, 230, 110);
 
-  for (let i = 0; i <= 10; i++) {
-    const xFront = lerp(-postHalfWidth, postHalfWidth, i / 10);
+  for (let i = 0; i <= 14; i++) {
+    const xFront = lerp(-postHalfWidth, postHalfWidth, i / 14);
     const xBack = lerp(
       -postHalfWidth - backSpread,
       postHalfWidth + backSpread,
-      i / 10,
+      i / 14,
     );
 
-    line(xFront, y, goalZ, xBack, y, goalZ - goalDepth);
+    line(xFront, y, goalZ, xBack, y, goalZ + goalDepth);
     line(
       xFront,
       y - goalHeight,
       goalZ,
       xBack,
       y - goalHeight,
-      goalZ - goalDepth,
+      goalZ + goalDepth,
     );
     line(xFront, y, goalZ, xFront, y - goalHeight, goalZ);
   }
 
-  for (let j = 0; j <= 8; j++) {
-    const yy = lerp(y, y - goalHeight, j / 8);
+  for (let j = 0; j <= 10; j++) {
+    const yy = lerp(y, y - goalHeight, j / 10);
     line(-postHalfWidth, yy, goalZ, postHalfWidth, yy, goalZ);
     line(
       -postHalfWidth - backSpread,
       yy,
-      goalZ - goalDepth,
+      goalZ + goalDepth,
       postHalfWidth + backSpread,
       yy,
-      goalZ - goalDepth,
+      goalZ + goalDepth,
     );
   }
 
   noStroke();
 }
-
 function drawSideStands() {
-  drawStandBlock(-1180, -980, 420, 420, 5, true);
-  drawStandBlock(1180, -980, 420, 420, 5, false);
-  drawBackStand();
+  drawLongSideStand(-1650, true);
+  drawLongSideStand(1650, false);
+}
+function drawLongSideStand(xCenter, leftSide) {
+  const levels = 7;
+  const standWidth = 520;
+  const zStart = -1500;
+  const zEnd = 900;
+  const stepDepth = 110;
+  const stepHeight = 42;
+
+  for (let i = 0; i < levels; i++) {
+    const yTop = Scene.floorY - i * stepHeight;
+
+    const x0 = leftSide ? xCenter - standWidth : xCenter;
+    const x1 = leftSide ? xCenter : xCenter + standWidth;
+
+    const z0 = zStart + i * 24;
+    const z1 = zEnd - i * 24;
+
+    // topo do degrau
+    const topMesh = Mesh.create(
+      [
+        [x0, yTop, z0],
+        [x1, yTop, z0],
+        [x1, yTop, z1],
+        [x0, yTop, z1],
+      ],
+      [
+        [0, 1, 2],
+        [0, 2, 3],
+      ],
+      [
+        [0, 0],
+        [1, 0],
+        [1, 1],
+        [0, 1],
+      ],
+    );
+
+    push();
+    const useTexture = applyMaterial("stand");
+    Geometry.drawMesh(topMesh, useTexture);
+    pop();
+
+    // frente visível do degrau
+    if (i < levels - 1) {
+      const frontMesh = Mesh.create(
+        [
+          [x0, yTop, z1],
+          [x1, yTop, z1],
+          [x1, yTop + stepHeight, z1],
+          [x0, yTop + stepHeight, z1],
+        ],
+        [
+          [0, 1, 2],
+          [0, 2, 3],
+        ],
+        [
+          [0, 0],
+          [1, 0],
+          [1, 1],
+          [0, 1],
+        ],
+      );
+
+      push();
+      const useTexture2 = applyMaterial("stand_front");
+      Geometry.drawMesh(frontMesh, useTexture2);
+      pop();
+    }
+  }
 }
 
 function drawStandBlock(xCenter, zStart, width, depthStep, levels, leftSide) {
   for (let i = 0; i < levels; i++) {
-    const yTop = Scene.floorY - i * 36;
-    const z0 = zStart - i * depthStep * 0.42;
-    const z1 = z0 - depthStep;
+    const yTop = Scene.floorY - i * 42;
+    const z0 = zStart + i * 70;
+    const z1 = z0 + depthStep;
 
     const x0 = leftSide ? xCenter - width : xCenter;
     const x1 = leftSide ? xCenter : xCenter + width;

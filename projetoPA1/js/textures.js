@@ -213,12 +213,23 @@ function applyMaterial(type) {
       specularMaterial(10, 10, 14);
       shininess(2);
       return false;
+    case "stand":
+      ambientMaterial(188, 188, 194);
+      specularMaterial(90, 90, 95);
+      shininess(5);
+      return false;
 
+    case "stand_front":
+      ambientMaterial(160, 160, 168);
+      specularMaterial(70, 70, 75);
+      shininess(4);
+      return false;
     case "stand":
       ambientMaterial(178, 178, 182);
       specularMaterial(80, 80, 85);
       shininess(4);
       return false;
+
     default:
       ambientMaterial(170, 170, 170);
       specularMaterial(90, 90, 90);
