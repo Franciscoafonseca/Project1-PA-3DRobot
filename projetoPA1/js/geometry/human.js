@@ -624,7 +624,7 @@ Geometry.makeShinHumanized = function (
 };
 
 Geometry.makeKneeHumanized = function () {
-  return Geometry.makeShoulderCap(13, 12);
+  return Geometry.makeShoulderCap(13.4, 16);
 };
 
 // ----------------------------------------------------------

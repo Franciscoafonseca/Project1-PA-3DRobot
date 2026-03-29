@@ -104,7 +104,7 @@ function buildRobotMeshes() {
 
     neckRing: Geometry.makeCapsuleY(11, 6, 24, 6),
 
-    shoulder: Geometry.makeShoulderCap(12.5, 12),
+    shoulder: Geometry.makeShoulderCap(12.5, 16),
     upperArm: Geometry.makeUpperArmRounded(54, 16.5, 13.5, 16.0, 12.5),
     elbow: Geometry.makeElbowDisc(6.8, 7.0),
     forearm: Geometry.makeForearmRounded(48, 13.2, 9.8, 12.8, 9.0),
