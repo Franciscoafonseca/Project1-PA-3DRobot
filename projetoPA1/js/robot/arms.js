@@ -16,7 +16,7 @@ function drawArm(torsoMatrix, left) {
     Mat4.translation(44 * side, -30, 0),
   );
 
-  drawPart(robotMeshes.shoulder, shoulderMount, "skin");
+  drawPart(robotMeshes.shoulder, shoulderMount, "metal");
 
   const shoulderPivot = Mat4.compose(
     shoulderMount,
@@ -27,7 +27,7 @@ function drawArm(torsoMatrix, left) {
   drawPart(robotMeshes.upperArm, upperArm, "skin");
 
   const elbowMount = Mat4.compose(shoulderPivot, Mat4.translation(0, 52, 0));
-  drawPart(robotMeshes.elbow, elbowMount, "skin");
+  drawPart(robotMeshes.elbow, elbowMount, "metal");
 
   const elbowPivot = Mat4.compose(elbowMount, Mat4.rotateX(elbowAngle));
 
@@ -35,7 +35,7 @@ function drawArm(torsoMatrix, left) {
   drawPart(robotMeshes.forearm, forearm, "skin");
 
   const wristMount = Mat4.compose(elbowPivot, Mat4.translation(0, 54.5, 0));
-  drawPart(robotMeshes.wrist, wristMount, "skin");
+  drawPart(robotMeshes.wrist, wristMount, "metal");
 
   const wristPivot = Mat4.compose(wristMount, Mat4.rotateX(wristAngle));
 

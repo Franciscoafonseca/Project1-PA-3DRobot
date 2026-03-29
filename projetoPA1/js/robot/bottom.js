@@ -44,7 +44,7 @@ function drawLeg(pelvisMatrix, left) {
     thighStart,
     Mat4.translation(0, thighHeight + 9, 0),
   );
-  drawPart(robotMeshes.knee, kneeMount, "metaldelado");
+  drawPart(robotMeshes.knee, kneeMount, "metal");
 
   const kneePivot = Mat4.compose(kneeMount, Mat4.rotateX(kneeAngle));
 
