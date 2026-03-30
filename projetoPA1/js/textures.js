@@ -23,19 +23,19 @@ function loadTextures() {
   Textures.metalPattern = loadImage("assets/textures/metal-pattern.jpg");
 
   Textures.plastic = loadImage("assets/textures/plastico.png");
-  Textures.glass = loadImage("assets/textures/vidro.png");
+  Textures.glass = loadImage("assets/textures/vidro.jpg");
 
   Textures.skin = loadImage("assets/textures/skin.jpg");
   Textures.hair = loadImage("assets/textures/cabelo.jpg");
 
   // azul -> camisola
-  Textures.jersey = loadImage("assets/textures/tshirt.jpg");
+  Textures.jersey = loadImage("assets/textures/tecido.jpg");
 
   // branco -> calções
   Textures.shorts = loadImage("assets/textures/shorts.jpg");
 
   // chuteira
-  Textures.boots = loadImage("assets/textures/boots.png");
+  Textures.boots = loadImage("assets/textures/lether.jpg");
 
   Textures.grass = loadImage("assets/textures/relva.jpg");
   Textures.cimento = loadImage("assets/textures/cimento.jpg");
@@ -87,16 +87,16 @@ function applyMaterial(type) {
     case "glass":
       if (Textures.glass) {
         texture(Textures.glass);
-        ambientMaterial(255, 255, 255);
-        emissiveMaterial(90, 180, 255);
+        ambientMaterial(170, 210, 245);
+        emissiveMaterial(20, 40, 60);
         specularMaterial(255, 255, 255);
-        shininess(30);
+        shininess(20);
         return true;
       }
-      ambientMaterial(90, 170, 255);
-      emissiveMaterial(90, 180, 255);
+      ambientMaterial(160, 205, 245);
+      emissiveMaterial(20, 40, 60);
       specularMaterial(255, 255, 255);
-      shininess(30);
+      shininess(20);
       return false;
 
     case "skin":
@@ -247,6 +247,13 @@ function applyMaterial(type) {
       ambientMaterial(120, 80, 50);
       specularMaterial(90, 90, 90);
       shininess(10);
+      return false;
+
+    case "led_blue":
+      ambientMaterial(120, 200, 255);
+      emissiveMaterial(240, 252, 255);
+      specularMaterial(255, 255, 255);
+      shininess(140);
       return false;
 
     default:

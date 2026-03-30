@@ -11,7 +11,6 @@ function drawHead(root) {
 
   const head = Mat4.compose(headPivot, Mat4.translation(0, -20, 0));
 
-  // cabeça com pele
   drawPart(robotMeshes.head, head, "skin");
 
   drawHeadHair(head);
@@ -20,19 +19,16 @@ function drawHead(root) {
 }
 
 function drawHeadHair(headMatrix) {
-  // topo mais comprido para a frente e para trás
   if (robotMeshes.hairTopBar) {
     const topBar = Mat4.compose(headMatrix, Mat4.translation(0, -25.5, -3.0));
     drawPart(robotMeshes.hairTopBar, topBar, "hair");
   }
 
-  // trás puxado um pouco para a frente para unir com o topo
   if (robotMeshes.hairBackBar) {
     const backBar = Mat4.compose(headMatrix, Mat4.translation(0, 0.5, -19.5));
     drawPart(robotMeshes.hairBackBar, backBar, "hair");
   }
 
-  // laterais mais compridas para fechar a estrutura
   if (robotMeshes.hairSideL) {
     const sideL = Mat4.compose(headMatrix, Mat4.translation(-13.8, 0.5, -9.5));
     drawPart(robotMeshes.hairSideL, sideL, "hair");
@@ -65,9 +61,8 @@ function drawHeadEars(headMatrix) {
 
 function drawHeadFace(headMatrix) {
   if (robotMeshes.visor) {
-    // mais colado à cara
     const visor = Mat4.compose(headMatrix, Mat4.translation(0, -8.5, 22.0));
-    drawPanel(robotMeshes.visor, visor, "metal", "glass");
+    drawPanel(robotMeshes.visor, visor, "metal", "led_blue");
   }
 
   drawHeadLeds(headMatrix);
@@ -78,13 +73,11 @@ function drawHeadFace(headMatrix) {
 function drawHeadLeds(headMatrix) {
   if (!robotMeshes.eyeLed) return;
 
-  // mais próximos do centro e mais colados à cara
   const leftEye = Mat4.compose(headMatrix, Mat4.translation(-7.8, -8.2, 22.4));
-
   const rightEye = Mat4.compose(headMatrix, Mat4.translation(7.8, -8.2, 22.4));
 
-  drawPart(robotMeshes.eyeLed, leftEye, "glass");
-  drawPart(robotMeshes.eyeLed, rightEye, "glass");
+  drawPart(robotMeshes.eyeLed, leftEye, "led_blue");
+  drawPart(robotMeshes.eyeLed, rightEye, "led_blue");
 }
 
 function drawNose(headMatrix) {
@@ -102,7 +95,11 @@ function drawNose(headMatrix) {
 function drawMoustache(headMatrix) {
   if (!robotMeshes.moustache) return;
 
-  const moustache = Mat4.compose(headMatrix, Mat4.translation(0, 10.6, 24.0));
+  const moustache = Mat4.compose(
+    headMatrix,
+    Mat4.translation(0, 10.0, 22.8),
+    Mat4.scale(1.45, 1.18, 1.15),
+  );
 
   drawPart(robotMeshes.moustache, moustache, "hair");
 }

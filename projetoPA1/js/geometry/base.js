@@ -8,7 +8,62 @@ class Geometry {
   // ----------------------------------------------------------
   // BASIC HELPERS
   // ----------------------------------------------------------
+  static signedArea2D(points) {
+    let area = 0;
 
+    for (let i = 0; i < points.length; i++) {
+      const [x1, y1] = points[i];
+      const [x2, y2] = points[(i + 1) % points.length];
+      area += x1 * y2 - x2 * y1;
+    }
+
+    return area * 0.5;
+  }
+  static triangleCentroid(a, b, c) {
+    return [
+      (a[0] + b[0] + c[0]) / 3,
+      (a[1] + b[1] + c[1]) / 3,
+      (a[2] + b[2] + c[2]) / 3,
+    ];
+  }
+
+  static meshCentroid(mesh) {
+    if (!mesh || !mesh.vertices || mesh.vertices.length === 0) return [0, 0, 0];
+
+    let sx = 0;
+    let sy = 0;
+    let sz = 0;
+
+    for (const v of mesh.vertices) {
+      sx += v[0];
+      sy += v[1];
+      sz += v[2];
+    }
+
+    const inv = 1 / mesh.vertices.length;
+    return [sx * inv, sy * inv, sz * inv];
+  }
+
+  static dot3(a, b) {
+    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  }
+
+  static sub3(a, b) {
+    return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+  }
+  static ensureCCWProfile(points) {
+    if (!points || points.length < 3) return points ? points.slice() : [];
+
+    const area = Geometry.signedArea2D(points);
+    if (area < 0) {
+      return points
+        .slice()
+        .reverse()
+        .map((p) => [...p]);
+    }
+
+    return points.slice().map((p) => [...p]);
+  }
   static addQuad(triangles, i0, i1, i2, i3) {
     triangles.push([i0, i1, i2]);
     triangles.push([i0, i2, i3]);
@@ -189,22 +244,24 @@ class Geometry {
 
     const zFront = depth / 2;
     const zBack = -depth / 2;
-    const n = profile.length;
+
+    const fixedProfile = Geometry.ensureCCWProfile(profile);
+    const n = fixedProfile.length;
 
     if (n < 3) return Mesh.create([], [], []);
 
-    const { minX, maxX, minY, maxY } = Geometry.profileBounds(profile);
+    const { minX, maxX, minY, maxY } = Geometry.profileBounds(fixedProfile);
     const spanX = Math.max(1e-6, maxX - minX);
     const spanY = Math.max(1e-6, maxY - minY);
 
     for (let i = 0; i < n; i++) {
-      const [x, y] = profile[i];
+      const [x, y] = fixedProfile[i];
       vertices.push([x, y, zFront]);
       uvs.push([(x - minX) / spanX, (y - minY) / spanY]);
     }
 
     for (let i = 0; i < n; i++) {
-      const [x, y] = profile[i];
+      const [x, y] = fixedProfile[i];
       vertices.push([x, y, zBack]);
       uvs.push([1 - (x - minX) / spanX, (y - minY) / spanY]);
     }
@@ -229,7 +286,6 @@ class Geometry {
 
     return Mesh.create(vertices, triangles, uvs);
   }
-
   // ----------------------------------------------------------
   // BASIC SHAPES
   // ----------------------------------------------------------
@@ -833,8 +889,12 @@ Geometry.loftProfiles = function (
   closeCaps = true,
 ) {
   const count = Math.max(profileA.length, profileB.length, 3);
-  const a = Geometry.resampleProfile(profileA, count);
-  const b = Geometry.resampleProfile(profileB, count);
+
+  const fixedA = Geometry.ensureCCWProfile(profileA);
+  const fixedB = Geometry.ensureCCWProfile(profileB);
+
+  const a = Geometry.resampleProfile(fixedA, count);
+  const b = Geometry.resampleProfile(fixedB, count);
 
   const vertices = [];
   const triangles = [];
@@ -1217,21 +1277,34 @@ Geometry.makeBootShell = function (length = 36, height = 12, width = 16) {
 Geometry.drawMesh = function (mesh, useTexture = false) {
   beginShape(TRIANGLES);
 
+  const center = Geometry.meshCentroid(mesh);
+
   for (const tri of mesh.triangles) {
-    const a = mesh.vertices[tri[0]];
-    const b = mesh.vertices[tri[1]];
-    const c = mesh.vertices[tri[2]];
+    const ia = tri[0];
+    const ib = tri[1];
+    const ic = tri[2];
 
-    const n = Geo.triangleNormal(a, b, c);
+    const a = mesh.vertices[ia];
+    const b = mesh.vertices[ib];
+    const c = mesh.vertices[ic];
 
-    // ligeira suavização artificial
+    let n = Geo.triangleNormal(a, b, c);
+
+    const triCenter = Geometry.triangleCentroid(a, b, c);
+    const outward = Geometry.sub3(triCenter, center);
+
+    // se a normal estiver apontada para dentro, inverte
+    if (Geometry.dot3(n, outward) < 0) {
+      n = [-n[0], -n[1], -n[2]];
+    }
+
     const len = Math.hypot(n[0], n[1], n[2]) || 1;
     normal(n[0] / len, n[1] / len, n[2] / len);
 
     if (useTexture && mesh.uvs && mesh.uvs.length > 0) {
-      const uva = mesh.uvs[tri[0]] || [0, 0];
-      const uvb = mesh.uvs[tri[1]] || [1, 0];
-      const uvc = mesh.uvs[tri[2]] || [1, 1];
+      const uva = mesh.uvs[ia] || [0, 0];
+      const uvb = mesh.uvs[ib] || [1, 0];
+      const uvc = mesh.uvs[ic] || [1, 1];
 
       vertex(a[0], a[1], a[2], uva[0], uva[1]);
       vertex(b[0], b[1], b[2], uvb[0], uvb[1]);

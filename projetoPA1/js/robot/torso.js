@@ -4,7 +4,7 @@ function drawBackPanel(torsoBody, number = 8) {
     Mat4.translation(0, -2, -19.5),
   );
 
-  drawPanel(robotMeshes.backPanel, backPanelMatrix, "glass", "");
+  drawPanel(robotMeshes.backPanel, backPanelMatrix, "vidro", "led_blue");
 
   const digitBase = Mat4.compose(torsoBody, Mat4.translation(0, -2, -22.2));
 
@@ -60,8 +60,8 @@ function drawTorso(root) {
   // // peitorais - maiores e a preencher o topo
   // const pecL = Mat4.compose(torsoBody, Mat4.translation(-17.5, -34, 19.5));
   // const pecR = Mat4.compose(torsoBody, Mat4.translation(17.5, -34, 19.5));
-  // drawPart(robotMeshes.pecL, pecL, "jersey");
-  // drawPart(robotMeshes.pecR, pecR, "jersey");
+  // drawPart(robotMeshes.pecL, pecL, "metal");
+  // drawPart(robotMeshes.pecR, pecR, "metal");
   // peitorais grandes e alinhados com o topo do tronco
   const pecL = Mat4.compose(torsoBody, Mat4.translation(-18.5, -36, 20.0));
   const pecR = Mat4.compose(torsoBody, Mat4.translation(18.5, -36, 20.0));
