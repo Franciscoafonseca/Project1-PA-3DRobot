@@ -7,11 +7,11 @@ function drawPelvis(pelvisMatrix) {
     Mat4.translation(0, 3.0, 0.0),
   );
 
-  drawPart(robotMeshes.pelvis, pelvisVisual, "shorts");
+  if (robotMeshes.pelvis) {
+    drawPart(robotMeshes.pelvis, pelvisVisual, "shorts");
+  }
 }
-// ------------------------------------------------------------
-// LEG
-// ------------------------------------------------------------
+
 // ------------------------------------------------------------
 // LEG
 // ------------------------------------------------------------
@@ -26,11 +26,13 @@ function drawLeg(pelvisMatrix, left) {
   const kneeHeight = 12;
   const shinHeight = 58;
 
+  // anca
   const hipMount = Mat4.compose(
     pelvisMatrix,
     Mat4.translation(17 * side, 10, 0),
   );
 
+  // a coxa é que deve receber o movimento principal
   const hipPivot = Mat4.compose(hipMount, Mat4.rotateX(hipAngle));
 
   drawShortsLegFlap(hipPivot, left);
@@ -42,20 +44,21 @@ function drawLeg(pelvisMatrix, left) {
   // joelho
   const kneeMount = Mat4.compose(
     thighStart,
-    Mat4.translation(0, thighHeight + 7, 3),
+    Mat4.translation(0, thighHeight + 7, 0),
   );
   drawPart(robotMeshes.knee, kneeMount, "metal");
 
-  const kneePivot = Mat4.compose(kneeMount, Mat4.rotateX(kneeAngle));
+  // joelho dobra a partir da coxa; manter sem offsets extra em Z
+  const kneePivot = Mat4.compose(kneeMount, Mat4.rotateX(-kneeAngle));
 
   // canela
   const shinStart = Mat4.compose(
     kneePivot,
-    Mat4.translation(0, kneeHeight - 5, -3),
+    Mat4.translation(0, kneeHeight - 5, 0),
   );
   drawPart(robotMeshes.shin, shinStart, "skin");
 
-  // pé
+  // tornozelo
   const ankleMount = Mat4.compose(
     shinStart,
     Mat4.translation(0, shinHeight + 5, 0),
@@ -63,13 +66,18 @@ function drawLeg(pelvisMatrix, left) {
 
   const footBase = Mat4.compose(ankleMount, Mat4.rotateX(ankleAngle - 0.08));
   const footMatrix = Mat4.compose(footBase, Mat4.translation(0, 0, 10));
+
   drawPart(robotMeshes.foot, footMatrix, "boots");
 }
 
+// ------------------------------------------------------------
+// SHORTS
+// ------------------------------------------------------------
 function drawShortsWaist(pelvisMatrix) {
   if (!robotMeshes?.shorts?.waist) return;
 
-  const m = Mat4.compose(pelvisMatrix, Mat4.translation(0, -3.5, 0.0));
+  // sobe ligeiramente a cintura para fechar melhor a zona com o torso
+  const m = Mat4.compose(pelvisMatrix, Mat4.translation(0, -5.5, 0.0));
 
   drawPart(robotMeshes.shorts.waist, m, "shorts");
 }
@@ -91,8 +99,13 @@ function drawShortsLegFlap(hipPivot, left) {
   );
 }
 
+// ------------------------------------------------------------
+// LOWER BODY
+// ------------------------------------------------------------
 function drawLowerBody(pelvisMatrix) {
-  drawShortsWaist(pelvisMatrix);
-  drawLeg(pelvisMatrix, true);
-  drawLeg(pelvisMatrix, false);
+  const pelvisBodyMatrix = pelvisMatrix;
+
+  drawShortsWaist(pelvisBodyMatrix);
+  drawLeg(pelvisBodyMatrix, true);
+  drawLeg(pelvisBodyMatrix, false);
 }

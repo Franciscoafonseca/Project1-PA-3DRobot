@@ -5,15 +5,20 @@ let football = null;
 //inicializacao
 function initRobot() {
   robot = {
-    pos: [0, -105, 0],
+    pos: [0, -20, 0],
     yaw: 0,
-
+    baseY: -20,
+    verticalOffset: 0,
+    torsoDrop: 0,
     torsoLean: 0,
     headYaw: 0,
     headPitch: 0,
 
     leftShoulder: 0,
     rightShoulder: 0,
+
+    leftShoulderSpread: 0,
+    rightShoulderSpread: 0,
 
     leftElbow: 0.18,
     rightElbow: 0.18,
@@ -39,16 +44,26 @@ function initRobot() {
     moving: false,
     idle: true,
     walkPhase: 0,
+    moveMode: "none",
+    animState: "idle",
 
     kickActive: false,
     kickPhase: 0,
     kickingLeg: "right",
     ballAlreadyKicked: false,
+
+    jumpHeaderActive: false,
+    jumpHeaderPhase: 0,
+    _headerHitDone: false,
+
+    // importantes para a aterragem
+    pelvisDrop: 0,
+    pelvisPitch: 0,
   };
 
   football = {
     pos: [85, 198, 110],
-    radius: 20,
+    radius: 25,
     velocity: [0, 0, 0],
   };
 
@@ -62,9 +77,9 @@ function buildRobotMeshes() {
     pecL: Geometry.makeRoundedRectPrism(34, 28, 10, 5, 4),
     pecR: Geometry.makeRoundedRectPrism(34, 28, 10, 5, 4),
 
-    upperAbs: Geometry.makeRoundedRectPrism(20, 10, 5.2, 4, 4),
-    midAbs: Geometry.makeRoundedRectPrism(18, 10, 5.0, 4, 4),
-    lowerAbs: Geometry.makeRoundedRectPrism(16, 10, 4.8, 4, 4),
+    upperAbs: Geometry.makeRoundedRectPrism(18, 10, 4.6, 4, 4),
+    midAbs: Geometry.makeRoundedRectPrism(16, 10, 4.4, 4, 4),
+    lowerAbs: Geometry.makeRoundedRectPrism(14, 10, 4.2, 4, 4),
 
     shorts: Geometry.makeShortsAdvanced(70, 35, 33),
 
@@ -113,12 +128,13 @@ function buildRobotMeshes() {
 
     fingerSegment: Geometry.makeFingerRounded(7, 3, 2, 3, 2),
     fingerJoint: Geometry.makeFingerJoint(1.08, 2.0, 12),
+    lowerTorso: Geometry.makeRoundedRectPrism(40, 18, 12, 3, 4),
 
     hipJoint: Geometry.makeHipJoint(8.4, 15, 12),
     thigh: Geometry.makeThighHumanized(13.5, 58),
     knee: Geometry.makeKneeHumanized(11, 6.8, 8.0),
     shin: Geometry.makeShinHumanized(9.4, 5.4, 58),
-    foot: Geometry.makeFootballBootProfile(34, 13.0, 10.8),
+    foot: Geometry.makeFootballBootProfile(46, 10.0, 15.0),
     football: Geometry.makeFootball(football.radius),
   };
 }
@@ -129,14 +145,22 @@ function drawRobot() {
   if (!robot || !robotMeshes) return;
 
   const root = Mat4.compose(
-    Mat4.translation(robot.pos[0], robot.pos[1], robot.pos[2]),
+    Mat4.translation(
+      robot.pos[0],
+      robot.baseY + (robot.verticalOffset || 0),
+      robot.pos[2],
+    ),
     Mat4.rotateY(robot.yaw),
     Mat4.rotateX(robot.torsoLean),
   );
 
   const lowerBodyMatrix = Mat4.compose(root, Mat4.translation(0, 84, 0));
   drawLowerBody(lowerBodyMatrix);
-  const torsoMatrix = root;
+
+  const torsoMatrix = Mat4.compose(
+    root,
+    Mat4.translation(0, robot.torsoDrop || 0, 0),
+  );
 
   drawTorso(torsoMatrix);
   drawHead(torsoMatrix);
@@ -202,19 +226,26 @@ function drawFootball() {
   const worldMesh = Mesh.transformed(robotMeshes.football, m);
 
   push();
-  applyMaterial("plastic");
-  Geometry.drawMesh(worldMesh, false);
+  const useTexture = applyMaterial("football");
+  Geometry.drawMesh(worldMesh, useTexture);
   pop();
 }
 
 //reset
 
 function resetRobotPose() {
+  robot.pos[1] = -20;
+  robot.baseY = -20;
+  robot.verticalOffset = 0;
+  robot.torsoDrop = 0;
   robot.headYaw = 0;
   robot.headPitch = 0;
 
   robot.leftShoulder = 0;
   robot.rightShoulder = 0;
+
+  robot.leftShoulderSpread = 0;
+  robot.rightShoulderSpread = 0;
 
   robot.leftElbow = 0.18;
   robot.rightElbow = 0.18;
@@ -230,15 +261,29 @@ function resetRobotPose() {
 
   robot.leftHip = 0;
   robot.rightHip = 0;
+
   robot.leftKnee = 0;
   robot.rightKnee = 0;
 
+  robot.leftAnkle = 0;
+  robot.rightAnkle = 0;
+
   robot.torsoLean = 0;
+
+  robot.moving = false;
+  robot.moveMode = "none";
+  robot.animState = "idle";
+
   robot.kickActive = false;
   robot.kickPhase = 0;
   robot.ballAlreadyKicked = false;
-}
 
+  robot.jumpHeaderActive = false;
+  robot.jumpHeaderPhase = 0;
+  robot._headerHitDone = false;
+  robot.pelvisDrop = 0;
+  robot.pelvisPitch = 0;
+}
 function lerpValue(a, b, t) {
   return a + (b - a) * t;
 }

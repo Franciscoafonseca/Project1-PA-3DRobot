@@ -4,7 +4,7 @@ function drawBackPanel(torsoBody, number = 8) {
     Mat4.translation(0, -2, -19.5),
   );
 
-  drawPanel(robotMeshes.backPanel, backPanelMatrix, "metal", "glass");
+  drawPanel(robotMeshes.backPanel, backPanelMatrix, "glass", "");
 
   const digitBase = Mat4.compose(torsoBody, Mat4.translation(0, -2, -22.2));
 
@@ -90,5 +90,8 @@ function drawTorso(root) {
 
   drawPart(robotMeshes.lowerAbs, lowerAbsL, "jersey");
   drawPart(robotMeshes.lowerAbs, lowerAbsR, "jersey");
+
+  const lowerTorso = Mat4.compose(torsoBody, Mat4.translation(0, 55, 5));
+  drawPart(robotMeshes.lowerTorso, lowerTorso, "metal");
   drawBackPanel(torsoBody, 7);
 }

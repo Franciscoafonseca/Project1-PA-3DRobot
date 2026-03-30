@@ -6,6 +6,10 @@ function drawArm(torsoMatrix, left) {
   const side = left ? -1 : 1;
 
   const shoulderAngle = left ? robot.leftShoulder : robot.rightShoulder;
+  const shoulderSpread = left
+    ? robot.leftShoulderSpread
+    : robot.rightShoulderSpread;
+
   const elbowAngle = left ? robot.leftElbow : robot.rightElbow;
   const wristAngle = left ? robot.leftWrist : robot.rightWrist;
   const fingerCurl = left ? robot.leftFingerCurl : robot.rightFingerCurl;
@@ -16,12 +20,14 @@ function drawArm(torsoMatrix, left) {
     Mat4.translation(45 * side, -29, 0),
   );
 
-  drawPart(robotMeshes.shoulder, shoulderMount, "metal");
-
+  // abre para FORA com o spread e depois aplica o swing principal
   const shoulderPivot = Mat4.compose(
     shoulderMount,
+    Mat4.rotateZ(-side * shoulderSpread),
     Mat4.rotateX(shoulderAngle),
   );
+
+  drawPart(robotMeshes.shoulder, shoulderPivot, "metal");
 
   // upper arm começa um pouco abaixo do ombro para a articulação respirar
   const upperArm = Mat4.compose(shoulderPivot, Mat4.translation(0, 6.0, 0));
@@ -31,7 +37,8 @@ function drawArm(torsoMatrix, left) {
   const elbowMount = Mat4.compose(shoulderPivot, Mat4.translation(0, 58, 0));
   drawPart(robotMeshes.elbow, elbowMount, "metal");
 
-  const elbowPivot = Mat4.compose(elbowMount, Mat4.rotateX(elbowAngle));
+  // pequeno offset extra para o cotovelo "quebrar" melhor visualmente
+  const elbowPivot = Mat4.compose(elbowMount, Mat4.rotateX(elbowAngle + 0.08));
 
   // antebraço começa um pouco abaixo do cotovelo para não o tapar
   const forearm = Mat4.compose(elbowPivot, Mat4.translation(0, 4, 0));
@@ -41,6 +48,8 @@ function drawArm(torsoMatrix, left) {
   const wristMount = Mat4.compose(elbowPivot, Mat4.translation(0, 42, 0));
   drawPart(robotMeshes.wrist, wristMount, "metal");
 
+  // o pulso roda no eixo local da tua montagem;
+  // manter X aqui preserva os teus espaçamentos e evita destruir a mão
   const wristPivot = Mat4.compose(wristMount, Mat4.rotateX(wristAngle));
 
   // mão um pouco mais abaixo para não engolir o pulso

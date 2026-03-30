@@ -1,7 +1,7 @@
 // js/input.js
 // ============================================================
 // INPUT SYSTEM
-// Controls robot movement, joints, kick, and camera orbit/zoom
+// Controls robot movement, joints, kick, jump header, and camera
 // ============================================================
 
 const Input = {
@@ -9,10 +9,12 @@ const Input = {
 
   config: {
     moveSpeed: 10,
+    backwardSpeedFactor: 0.65,
     rotateSpeed: 0.03,
+
     jointSpeed: 0.025,
     headSpeed: 0.02,
-    clawSpeed: 0.02,
+    fingerSpeed: 0.02,
 
     camYawSpeed: 0.02,
     camPitchSpeed: 0.015,
@@ -53,12 +55,18 @@ function handleKeyPressed(k, keyCodeValue) {
     triggerKick("right");
   }
 
+  if (k === "z" || k === "Z") {
+    triggerJumpHeader();
+  }
+
   if (k === "r" || k === "R") {
     resetRobotPose();
   }
 
   if (k === "c" || k === "C") {
-    Scene.spotlightFollowRobot = !Scene.spotlightFollowRobot;
+    if (typeof Scene !== "undefined") {
+      Scene.spotlightFollowRobot = !Scene.spotlightFollowRobot;
+    }
   }
 
   if (k === "p" || k === "P") {
@@ -90,21 +98,39 @@ function updateInput() {
 // ------------------------------------------------------------
 function updateRobotMovementInput() {
   const moveSpeed = Input.config.moveSpeed;
+  const backwardSpeed = moveSpeed * Input.config.backwardSpeedFactor;
   const rotateSpeed = Input.config.rotateSpeed;
 
   robot.moving = false;
+  robot.moveMode = "none";
 
-  // W / S = move forward / backward
+  // while jumping header, allow body rotation only
+  if (robot.jumpHeaderActive) {
+    if (isKeyDownChar("a")) {
+      robot.yaw += rotateSpeed;
+    }
+
+    if (isKeyDownChar("d")) {
+      robot.yaw -= rotateSpeed;
+    }
+
+    return;
+  }
+
+  // W = run forward
   if (isKeyDownChar("w")) {
     robot.pos[0] += Math.sin(robot.yaw) * moveSpeed;
     robot.pos[2] += Math.cos(robot.yaw) * moveSpeed;
     robot.moving = true;
+    robot.moveMode = "forward";
   }
 
+  // S = walk backward
   if (isKeyDownChar("s")) {
-    robot.pos[0] -= Math.sin(robot.yaw) * moveSpeed;
-    robot.pos[2] -= Math.cos(robot.yaw) * moveSpeed;
+    robot.pos[0] -= Math.sin(robot.yaw) * backwardSpeed;
+    robot.pos[2] -= Math.cos(robot.yaw) * backwardSpeed;
     robot.moving = true;
+    robot.moveMode = "backward";
   }
 
   // A / D = rotate body
@@ -119,13 +145,14 @@ function updateRobotMovementInput() {
 
 // ------------------------------------------------------------
 // ROBOT JOINTS
+// Manual articulation controls
 // ------------------------------------------------------------
 function updateRobotJointInput() {
   const jointSpeed = Input.config.jointSpeed;
   const headSpeed = Input.config.headSpeed;
-  const clawSpeed = Input.config.clawSpeed;
+  const fingerSpeed = Input.config.fingerSpeed;
 
-  // Head Q / E
+  // Head yaw Q / E
   if (isKeyDownChar("q")) {
     robot.headYaw += headSpeed;
   }
@@ -148,47 +175,71 @@ function updateRobotJointInput() {
   // Elbows I / K
   if (isKeyDownChar("i")) {
     robot.leftElbow += jointSpeed;
-    robot.rightElbow -= jointSpeed;
+    robot.rightElbow += jointSpeed;
   }
 
   if (isKeyDownChar("k")) {
     robot.leftElbow -= jointSpeed;
-    robot.rightElbow += jointSpeed;
+    robot.rightElbow -= jointSpeed;
+  }
+
+  // Wrists T / Y
+  if (isKeyDownChar("t")) {
+    robot.leftWrist += jointSpeed;
+    robot.rightWrist += jointSpeed;
+  }
+
+  if (isKeyDownChar("y")) {
+    robot.leftWrist -= jointSpeed;
+    robot.rightWrist -= jointSpeed;
   }
 
   // Hips U / O
   if (isKeyDownChar("u")) {
     robot.leftHip -= jointSpeed;
-    robot.rightHip += jointSpeed;
+    robot.rightHip -= jointSpeed;
   }
 
   if (isKeyDownChar("o")) {
     robot.leftHip += jointSpeed;
-    robot.rightHip -= jointSpeed;
+    robot.rightHip += jointSpeed;
   }
 
   // Knees N / M
   if (isKeyDownChar("n")) {
     robot.leftKnee += jointSpeed;
-    robot.rightKnee -= jointSpeed;
+    robot.rightKnee += jointSpeed;
   }
 
   if (isKeyDownChar("m")) {
     robot.leftKnee -= jointSpeed;
-    robot.rightKnee += jointSpeed;
+    robot.rightKnee -= jointSpeed;
   }
 
-  // Optional claw Z / X
-  if (robot.leftClaw !== undefined && robot.rightClaw !== undefined) {
-    if (isKeyDownChar("z")) {
-      robot.leftClaw += clawSpeed;
-      robot.rightClaw += clawSpeed;
-    }
+  // Ankles B / V
+  if (isKeyDownChar("b")) {
+    robot.leftAnkle += jointSpeed;
+    robot.rightAnkle += jointSpeed;
+  }
 
-    if (isKeyDownChar("x")) {
-      robot.leftClaw -= clawSpeed;
-      robot.rightClaw -= clawSpeed;
-    }
+  if (isKeyDownChar("v")) {
+    robot.leftAnkle -= jointSpeed;
+    robot.rightAnkle -= jointSpeed;
+  }
+
+  // Fingers Z/X are now used by jump header, so use F/G for fingers
+  if (isKeyDownChar("f")) {
+    robot.leftFingerCurl += fingerSpeed;
+    robot.rightFingerCurl += fingerSpeed;
+    robot.leftThumbCurl += fingerSpeed * 0.7;
+    robot.rightThumbCurl += fingerSpeed * 0.7;
+  }
+
+  if (isKeyDownChar("g")) {
+    robot.leftFingerCurl -= fingerSpeed;
+    robot.rightFingerCurl -= fingerSpeed;
+    robot.leftThumbCurl -= fingerSpeed * 0.7;
+    robot.rightThumbCurl -= fingerSpeed * 0.7;
   }
 
   clampRobotJoints();
@@ -200,7 +251,7 @@ function updateRobotJointInput() {
 // 1 / 2 zoom
 // ------------------------------------------------------------
 function updateCameraInput() {
-  if (!Scene || !Scene.camera) return;
+  if (typeof Scene === "undefined" || !Scene.camera) return;
 
   const yawSpeed = Input.config.camYawSpeed;
   const pitchSpeed = Input.config.camPitchSpeed;
@@ -238,25 +289,35 @@ function updateCameraInput() {
 // LIMITS
 // ------------------------------------------------------------
 function clampRobotJoints() {
-  robot.headYaw = clampValue(robot.headYaw, -0.9, 0.9);
-  robot.headPitch = clampValue(robot.headPitch, -0.35, 0.35);
+  robot.headYaw = clampValue(robot.headYaw, -1.0, 1.0);
+  robot.headPitch = clampValue(robot.headPitch, -0.45, 0.35);
 
-  robot.leftShoulder = clampValue(robot.leftShoulder, -1.2, 1.2);
-  robot.rightShoulder = clampValue(robot.rightShoulder, -1.2, 1.2);
+  robot.leftShoulder = clampValue(robot.leftShoulder, -1.3, 1.3);
+  robot.rightShoulder = clampValue(robot.rightShoulder, -1.3, 1.3);
 
-  robot.leftElbow = clampValue(robot.leftElbow, -0.1, 1.2);
-  robot.rightElbow = clampValue(robot.rightElbow, -1.2, 0.1);
+  robot.leftShoulderSpread = clampValue(robot.leftShoulderSpread, -1.2, 1.2);
+  robot.rightShoulderSpread = clampValue(robot.rightShoulderSpread, -1.2, 1.2);
 
-  robot.leftHip = clampValue(robot.leftHip, -0.8, 0.8);
-  robot.rightHip = clampValue(robot.rightHip, -0.8, 0.8);
+  robot.leftWrist = clampValue(robot.leftWrist, -0.5, 0.5);
+  robot.rightWrist = clampValue(robot.rightWrist, -0.5, 0.5);
 
-  robot.leftKnee = clampValue(robot.leftKnee, -0.05, 1.0);
-  robot.rightKnee = clampValue(robot.rightKnee, -1.0, 0.05);
+  robot.leftHip = clampValue(robot.leftHip, -0.9, 0.9);
+  robot.rightHip = clampValue(robot.rightHip, -0.9, 0.9);
 
-  if (robot.leftClaw !== undefined && robot.rightClaw !== undefined) {
-    robot.leftClaw = clampValue(robot.leftClaw, 0.05, 0.8);
-    robot.rightClaw = clampValue(robot.rightClaw, 0.05, 0.8);
-  }
+  robot.leftElbow = clampValue(robot.leftElbow, 0.0, 1.3);
+  robot.rightElbow = clampValue(robot.rightElbow, 0.0, 1.3);
+
+  robot.leftKnee = clampValue(robot.leftKnee, 0.0, 1.3);
+  robot.rightKnee = clampValue(robot.rightKnee, 0.0, 1.3);
+
+  robot.leftAnkle = clampValue(robot.leftAnkle || 0, -0.45, 0.3);
+  robot.rightAnkle = clampValue(robot.rightAnkle || 0, -0.45, 0.3);
+
+  robot.leftFingerCurl = clampValue(robot.leftFingerCurl, 0.05, 0.75);
+  robot.rightFingerCurl = clampValue(robot.rightFingerCurl, 0.05, 0.75);
+
+  robot.leftThumbCurl = clampValue(robot.leftThumbCurl, 0.02, 0.7);
+  robot.rightThumbCurl = clampValue(robot.rightThumbCurl, 0.02, 0.7);
 }
 
 // ------------------------------------------------------------

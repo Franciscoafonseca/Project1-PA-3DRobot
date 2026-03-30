@@ -47,7 +47,7 @@ const Scene = {
     fieldGap: 260,
     levels: 6,
     zStart: -3400,
-    zEnd: 3600,
+    zEnd: 5000,
 
     stepHeight: 180,
     treadDepth: 320,
