@@ -323,8 +323,7 @@ function updateKickAnimation() {
       robot.rightAnkle = lerpValue(robot.rightAnkle, -0.18, 0.28);
 
       if (!robot.ballAlreadyKicked) {
-        tryKickBall("right");
-        robot.ballAlreadyKicked = true;
+        robot.ballAlreadyKicked = tryKickBall("right");
       }
     } else {
       // recovery
@@ -356,8 +355,7 @@ function updateKickAnimation() {
       robot.leftAnkle = lerpValue(robot.leftAnkle, -0.18, 0.28);
 
       if (!robot.ballAlreadyKicked) {
-        tryKickBall("left");
-        robot.ballAlreadyKicked = true;
+        robot.ballAlreadyKicked = tryKickBall("left");
       }
     } else {
       robot.leftHip = lerpValue(robot.leftHip, 0.02, 0.18);
@@ -714,7 +712,7 @@ function applyGroundedHeaderLegPose(
 // BALL INTERACTION
 // ------------------------------------------------------------
 function tryKickBall(leg) {
-  if (!football) return;
+  if (!football) return false;
 
   const footPos = getFootWorldPosition(leg);
   const dist = Vec3.distance(football.pos, footPos);
@@ -726,8 +724,11 @@ function tryKickBall(leg) {
       Math.cos(robot.yaw),
     ]);
 
-    football.velocity = [dir[0] * 9.0, -1.3, dir[2] * 9.0];
+    football.velocity = [dir[0] * 13.5, -1.9, dir[2] * 13.5];
+    return true;
   }
+
+  return false;
 }
 
 function tryHeadBall() {
