@@ -12,8 +12,8 @@ function initRobot() {
     headYaw: 0,
     headPitch: 0,
 
-    leftShoulder: -0.08,
-    rightShoulder: 0.08,
+    leftShoulder: 0,
+    rightShoulder: 0,
 
     leftElbow: 0.18,
     rightElbow: 0.18,
@@ -105,20 +105,20 @@ function buildRobotMeshes() {
     neckRing: Geometry.makeCapsuleY(11, 6, 24, 6),
 
     shoulder: Geometry.makeShoulderCap(12.5, 16),
-    upperArm: Geometry.makeUpperArmRounded(54, 16.5, 13.5, 16.0, 12.5),
+    upperArm: Geometry.makeUpperArmRounded(47, 16.5, 13.5, 16.0, 12.5),
+    forearm: Geometry.makeForearmRounded(37, 13.2, 9.8, 12.8, 9.0),
     elbow: Geometry.makeElbowDisc(6.8, 7.0),
-    forearm: Geometry.makeForearmRounded(48, 13.2, 9.8, 12.8, 9.0),
     wrist: Geometry.makeWristJoint(4.1, 6.8, 22),
-    palm: Geometry.makePalmRounded(13.8, 12.6, 8.8),
+    palm: Geometry.makePalmRounded(10, 12.6, 8.8),
 
     fingerSegment: Geometry.makeFingerRounded(7, 3, 2, 3, 2),
     fingerJoint: Geometry.makeFingerJoint(1.08, 2.0, 12),
 
     hipJoint: Geometry.makeHipJoint(8.4, 15, 12),
     thigh: Geometry.makeThighHumanized(13.5, 58),
-    knee: Geometry.makeKneeHumanized(9.2, 8.2, 9.0),
-    shin: Geometry.makeShinHumanized(9.4, 6.6, 58),
-    foot: Geometry.makeFootballBootProfile(36, 15.5, 13.5),
+    knee: Geometry.makeKneeHumanized(11, 6.8, 8.0),
+    shin: Geometry.makeShinHumanized(9.4, 5.4, 58),
+    foot: Geometry.makeFootballBootProfile(34, 13.0, 10.8),
     football: Geometry.makeFootball(football.radius),
   };
 }
@@ -213,8 +213,8 @@ function resetRobotPose() {
   robot.headYaw = 0;
   robot.headPitch = 0;
 
-  robot.leftShoulder = -0.08;
-  robot.rightShoulder = 0.08;
+  robot.leftShoulder = 0;
+  robot.rightShoulder = 0;
 
   robot.leftElbow = 0.18;
   robot.rightElbow = 0.18;

@@ -13,7 +13,7 @@ function drawArm(torsoMatrix, left) {
 
   const shoulderMount = Mat4.compose(
     torsoMatrix,
-    Mat4.translation(44 * side, -30, 0),
+    Mat4.translation(45 * side, -29, 0),
   );
 
   drawPart(robotMeshes.shoulder, shoulderMount, "metal");
@@ -23,27 +23,36 @@ function drawArm(torsoMatrix, left) {
     Mat4.rotateX(shoulderAngle),
   );
 
-  const upperArm = Mat4.compose(shoulderPivot, Mat4.translation(0, 23.5, 0));
+  // upper arm começa um pouco abaixo do ombro para a articulação respirar
+  const upperArm = Mat4.compose(shoulderPivot, Mat4.translation(0, 6.0, 0));
   drawPart(robotMeshes.upperArm, upperArm, "skin");
 
-  const elbowMount = Mat4.compose(shoulderPivot, Mat4.translation(0, 52, 0));
+  // cotovelo ligeiramente afastado do fim visual do upper arm
+  const elbowMount = Mat4.compose(shoulderPivot, Mat4.translation(0, 58, 0));
   drawPart(robotMeshes.elbow, elbowMount, "metal");
 
   const elbowPivot = Mat4.compose(elbowMount, Mat4.rotateX(elbowAngle));
 
-  const forearm = Mat4.compose(elbowPivot, Mat4.translation(0, 29.0, 0));
+  // antebraço começa um pouco abaixo do cotovelo para não o tapar
+  const forearm = Mat4.compose(elbowPivot, Mat4.translation(0, 4, 0));
   drawPart(robotMeshes.forearm, forearm, "skin");
 
-  const wristMount = Mat4.compose(elbowPivot, Mat4.translation(0, 54.5, 0));
+  // pulso mais abaixo para aparecer entre antebraço e mão
+  const wristMount = Mat4.compose(elbowPivot, Mat4.translation(0, 42, 0));
   drawPart(robotMeshes.wrist, wristMount, "metal");
 
   const wristPivot = Mat4.compose(wristMount, Mat4.rotateX(wristAngle));
 
-  const handBase = Mat4.compose(wristPivot, Mat4.translation(0, 7.6, 0));
+  // mão um pouco mais abaixo para não engolir o pulso
+  const handBase = Mat4.compose(wristPivot, Mat4.translation(0, 9.0, 0));
 
-  const handTurn = left ? Math.PI / 2 : -Math.PI / 2;
-  const palmY = Mat4.compose(handBase, Mat4.rotateY(handTurn));
-  const palm = Mat4.compose(palmY, Mat4.rotateX(0.04));
+  const handYaw = left ? Math.PI / 2 : -Math.PI / 2;
+
+  const palm = Mat4.compose(
+    handBase,
+    Mat4.rotateY(handYaw),
+    Mat4.rotateX(0.04),
+  );
 
   drawPart(robotMeshes.palm, palm, "skin");
   drawHandFingers(palm, left, fingerCurl, thumbCurl);
@@ -55,29 +64,32 @@ function drawArm(torsoMatrix, left) {
 function drawHandFingers(palmMatrix, left, fingerCurl, thumbCurl) {
   const side = left ? -1 : 1;
 
-  // topo da palma: dedos mais largos, maiores e melhor distribuídos
+  // espelha os dedos principais lateralmente para ficarem simétricos
   const indexBase = Mat4.compose(
     palmMatrix,
-    Mat4.translation(-3.55, 5.0, 1.15),
+    Mat4.translation(-3.55 * side, 5.0, 1.15),
   );
   drawFinger(indexBase, fingerCurl, 8.2, 6.1, 4.4);
 
   const middleBase = Mat4.compose(
     palmMatrix,
-    Mat4.translation(-1.15, 5.15, 0.38),
+    Mat4.translation(-1.15 * side, 5.15, 0.38),
   );
   drawFinger(middleBase, fingerCurl, 8.9, 6.5, 4.7);
 
-  const ringBase = Mat4.compose(palmMatrix, Mat4.translation(1.15, 5.0, -0.38));
+  const ringBase = Mat4.compose(
+    palmMatrix,
+    Mat4.translation(1.15 * side, 5.0, -0.38),
+  );
   drawFinger(ringBase, fingerCurl, 8.3, 6.1, 4.4);
 
   const littleBase = Mat4.compose(
     palmMatrix,
-    Mat4.translation(3.15, 4.7, -1.05),
+    Mat4.translation(3.15 * side, 4.7, -1.05),
   );
   drawFinger(littleBase, fingerCurl, 6.8, 5.1, 3.7);
 
-  // polegar na lateral correta
+  // polegar espelhado e com abertura consistente
   const thumbBase = Mat4.compose(
     palmMatrix,
     Mat4.translation(-3.3 * side, 0.9, 2.2),

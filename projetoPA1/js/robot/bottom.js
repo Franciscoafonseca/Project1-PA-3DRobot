@@ -42,7 +42,7 @@ function drawLeg(pelvisMatrix, left) {
   // joelho
   const kneeMount = Mat4.compose(
     thighStart,
-    Mat4.translation(0, thighHeight + 9, 0),
+    Mat4.translation(0, thighHeight + 7, 3),
   );
   drawPart(robotMeshes.knee, kneeMount, "metal");
 
@@ -51,7 +51,7 @@ function drawLeg(pelvisMatrix, left) {
   // canela
   const shinStart = Mat4.compose(
     kneePivot,
-    Mat4.translation(0, kneeHeight - 3, 0),
+    Mat4.translation(0, kneeHeight - 5, -3),
   );
   drawPart(robotMeshes.shin, shinStart, "skin");
 

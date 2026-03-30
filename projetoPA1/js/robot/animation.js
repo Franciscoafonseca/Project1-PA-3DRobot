@@ -18,16 +18,10 @@ function applyIdleAnimation() {
   robot.torsoLean = Math.sin(t * 1.5) * 0.012;
   robot.headPitch = Math.sin(t * 1.1) * 0.015;
 
-  robot.leftShoulder = lerpValue(
-    robot.leftShoulder,
-    -0.08 + Math.sin(t) * 0.01,
-    0.05,
-  );
-  robot.rightShoulder = lerpValue(
-    robot.rightShoulder,
-    0.08 - Math.sin(t) * 0.01,
-    0.05,
-  );
+  const shoulderIdle = Math.sin(t) * 0.01;
+
+  robot.leftShoulder = lerpValue(robot.leftShoulder, shoulderIdle, 0.05);
+  robot.rightShoulder = lerpValue(robot.rightShoulder, shoulderIdle, 0.05);
 
   robot.leftElbow = lerpValue(
     robot.leftElbow,
