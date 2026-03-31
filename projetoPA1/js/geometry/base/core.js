@@ -1,16 +1,10 @@
-// js/geometry/core.js
-// ============================================================
-// GEOMETRY CORE
-// Helpers matemáticos, utilitários de mesh e drawMesh
-// ============================================================
-
 class Geometry {
   // ----------------------------------------------------------
   // HELPERS 2D / 3D
   // ----------------------------------------------------------
 
-  // Área assinada de um polígono 2D.
-  // Serve para perceber a orientação dos pontos (CW ou CCW).
+  // Area assinada de um polígono 2D
+  // Serve para perceber a orientação dos pontos (CW ou CCW)
   static signedArea2D(points) {
     let area = 0;
 
@@ -23,7 +17,7 @@ class Geometry {
     return area * 0.5;
   }
 
-  // Centro de um triângulo 3D.
+  // Centro de um triângulo 3D
   static triangleCentroid(a, b, c) {
     return [
       (a[0] + b[0] + c[0]) / 3,
@@ -32,7 +26,7 @@ class Geometry {
     ];
   }
 
-  // Centro médio de todos os vértices de uma mesh.
+  // Centro médio de todos os vértices de uma mesh
   static meshCentroid(mesh) {
     if (!mesh || !mesh.vertices || mesh.vertices.length === 0) {
       return [0, 0, 0];
@@ -52,7 +46,7 @@ class Geometry {
     return [sx * inv, sy * inv, sz * inv];
   }
 
-  // Produto escalar entre dois vetores 3D.
+  // Produto escalar entre dois vetores 3D
   static dot3(a, b) {
     return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
   }
@@ -62,7 +56,7 @@ class Geometry {
     return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
   }
 
-  // Garante que um perfil 2D está em orientação anti-horária.
+  // Garante que um perfil 2D está em orientação anti-horária
   static ensureCCWProfile(points) {
     if (!points || points.length < 3) {
       return points ? points.slice() : [];
@@ -80,23 +74,23 @@ class Geometry {
     return points.slice().map((p) => [...p]);
   }
 
-  // Adiciona um quadrilátero já triangulado em 2 triângulos.
+  // Adiciona um quadrilátero já triangulado em 2 triângulos
   static addQuad(triangles, i0, i1, i2, i3) {
     triangles.push([i0, i1, i2]);
     triangles.push([i0, i2, i3]);
   }
 
-  // Junta várias meshes numa só.
+  // Junta várias meshes numa só
   static mergeMeshes(meshes) {
     return Mesh.merge(...meshes);
   }
 
-  // Clamp básico.
+  // Clamp básico
   static clamp(v, min, max) {
     return Math.max(min, Math.min(max, v));
   }
 
-  // Interpolação linear.
+  // Interpolação linear
   static lerp(a, b, t) {
     return a + (b - a) * t;
   }
@@ -184,9 +178,8 @@ class Geometry {
   // ----------------------------------------------------------
   // DESENHO DE MESH INDEXADA
   // ----------------------------------------------------------
-
-  // Desenha uma mesh usando TRIANGLES.
-  // Se useTexture=true e existirem UVs, envia coordenadas UV por vértice.
+  // Desenha uma mesh usando TRIANGLES
+  // Se useTexture=true e existirem UVs, envia coordenadas UV por vértice
   static drawMesh(mesh, useTexture = false) {
     beginShape(TRIANGLES);
 
@@ -206,7 +199,7 @@ class Geometry {
       const triCenter = Geometry.triangleCentroid(a, b, c);
       const outward = Geometry.sub3(triCenter, center);
 
-      // Se a normal estiver virada para dentro, inverte.
+      // Se a normal estiver virada para dentro, inverte
       if (Geometry.dot3(n, outward) < 0) {
         n = [-n[0], -n[1], -n[2]];
       }

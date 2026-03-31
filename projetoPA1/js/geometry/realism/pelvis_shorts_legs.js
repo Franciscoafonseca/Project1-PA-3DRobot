@@ -1,11 +1,5 @@
-// js/geometry/humanoid_pelvis_shorts.js
-// ============================================================
-// HUMANOID GEOMETRY - PELVIS / SHORTS
-// Pelvis, base dos calções e shells superiores das pernas
-// ============================================================
-
 // ----------------------------------------------------------
-// SHORT LEG SHELL
+// CALCAO DE CADA COIXA
 // ----------------------------------------------------------
 
 Geometry.makeShortLegShell = function (
@@ -71,7 +65,7 @@ Geometry.makeShortLegShell = function (
 };
 
 // ----------------------------------------------------------
-// PELVIS
+// BACIA
 // ----------------------------------------------------------
 
 Geometry.makePelvisAdvanced = function (width = 92, height = 38, depth = 54) {
@@ -132,7 +126,7 @@ Geometry.makeShortsAdvanced = function (
   const shortsHeight = waistHeight;
   const shortsDepth = depth;
 
-  // perfil superior: mais largo e estável
+  // PERFIL SUPERIOR
   const bottomProfile = Geometry.makeSuperellipseProfile(
     shortsWidth,
     shortsDepth,
@@ -140,8 +134,8 @@ Geometry.makeShortsAdvanced = function (
     40,
   );
 
-  // perfil inferior:
-  // mais estreito nas laterais e um pouco mais orgânico
+  // PERFIL INFERIOR
+  // mais estreito nas laterais e um pouco mais realista
   const topProfileRaw = Geometry.makeSuperellipseProfile(
     shortsWidth * 0.98,
     shortsDepth * 0.99,
@@ -149,7 +143,7 @@ Geometry.makeShortsAdvanced = function (
     40,
   );
 
-  // afundar ligeiramente as laterais em baixo para parecer mesmo calção
+  // afundamento ligeiramente as laterais em baixo para parecer mesmo calção
   const topProfile = topProfileRaw.map(([x, z]) => {
     const sideFactor = Math.abs(x) / (shortsWidth * 0.5);
     const inset = Math.pow(sideFactor, 1.35) * 3.0;
@@ -215,7 +209,7 @@ Geometry.makeShortsAdvanced = function (
 };
 
 // ----------------------------------------------------------
-// HIP BASE / JOINT
+// BASE BACIA / JUNCAO BACIA CALCOES
 // ----------------------------------------------------------
 
 Geometry.makeShortsBase = function () {
@@ -226,10 +220,9 @@ Geometry.makeHipJoint = function (radius = 7.8, width = 14, depth = 11) {
   return Geometry.makeCapsuleX(radius, width, 18, 6);
 };
 
-// HUMANOID GEOMETRY - LEGS
-
+// PERNAS REALISTAS
 // ----------------------------------------------------------
-// GENERIC LIMB
+// Estrutura das pernas
 // ----------------------------------------------------------
 
 Geometry.makeFunnelLimb = function (

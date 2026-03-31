@@ -1,11 +1,5 @@
-// js/geometry/humanoid_boot_ball.js
-// ============================================================
-// HUMANOID GEOMETRY - BOOT / BALL
-// Chuteira, pitões, cone auxiliar e bola
-// ============================================================
-
 // ----------------------------------------------------------
-// CONE / STUD
+// CONE / PITOES
 // ----------------------------------------------------------
 
 Geometry.makeCone = function (radius = 1, height = 2, segments = 16) {
@@ -52,7 +46,7 @@ Geometry.makeConeStud = function (radius = 0.9, height = 2.2, segments = 12) {
 };
 
 // ----------------------------------------------------------
-// BOOT
+// SAPATILHA
 // ----------------------------------------------------------
 
 Geometry.makeSimpleFootballBoot = function (
@@ -90,7 +84,7 @@ Geometry.makeFootballBootProfile = function (
   const upper = Geometry.makeSimpleFootballBoot(length, height, width);
 
   const studs = [
-    // frente
+    // calcanhar traseira
     Mesh.transformed(
       Geometry.makeConeStud(width * 0.072, height * 0.38, 12),
       Mat4.translation(-width * 0.24, height * 0.1, length * 0.26),
@@ -100,7 +94,7 @@ Geometry.makeFootballBootProfile = function (
       Mat4.translation(width * 0.24, height * 0.1, length * 0.26),
     ),
 
-    // antepé
+    // calcanha entre o meio e a traseira
     Mesh.transformed(
       Geometry.makeConeStud(width * 0.07, height * 0.36, 12),
       Mat4.translation(-width * 0.28, height * 0.14, length * 0.08),

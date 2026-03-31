@@ -3,9 +3,9 @@ let robotMeshes = null;
 let football = null;
 
 // ------------------------------------------------------------
-// Inicializa o estado do robot e da bola.
+// Inicializa o estado do robot e da bola
 // Aqui ficam guardados os valores base de posição,
-// orientação, articulações e estados de animação.
+// orientação, articulações e estados de animação
 // ------------------------------------------------------------
 function initRobot() {
   robot = {

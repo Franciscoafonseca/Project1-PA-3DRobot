@@ -1,4 +1,3 @@
-// js/matrix.js
 // ============================================================
 // FINAL MATRIX LIBRARY FOR PA PROJECT
 // Computer Graphics - p5.js WEBGL

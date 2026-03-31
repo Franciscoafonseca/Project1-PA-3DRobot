@@ -5,7 +5,7 @@
 // ============================================================
 
 // ----------------------------------------------------------
-// ARM SYSTEM
+// BRACO COMPLETO
 // ----------------------------------------------------------
 
 Geometry.makeShoulderCap = function (radius = 12.5, length = 12) {
@@ -85,7 +85,7 @@ Geometry.makeWristJoint = function (radius = 4.1, height = 6.8, segments = 22) {
 };
 
 // ----------------------------------------------------------
-// HAND SYSTEM
+// SISTEMA DAS MAOS
 // ----------------------------------------------------------
 
 Geometry.makePalmRounded = function (width = 13.8, height = 12.6, depth = 8.8) {
