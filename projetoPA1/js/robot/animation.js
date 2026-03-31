@@ -1,11 +1,8 @@
 // ------------------------------------------------------------
-// ANIMATION SYSTEM
-// Full state-based animation controller for the robot
+// SISTEMA DE ANIMAÇÃO
 // ------------------------------------------------------------
 
-// ------------------------------------------------------------
-// MAIN UPDATE
-// ------------------------------------------------------------
+// Atualiza o estado e aplica a animação ativa
 function updateRobot() {
   if (!robot) return;
 
@@ -37,7 +34,7 @@ function updateRobot() {
 }
 
 // ------------------------------------------------------------
-// STATE MACHINE
+// ESCOLHA DO ESTADO ATUAL
 // ------------------------------------------------------------
 function updateAnimationState() {
   if (robot.kickActive) {
@@ -64,7 +61,7 @@ function updateAnimationState() {
 }
 
 // ------------------------------------------------------------
-// IDLE
+// ANIMAÇÃO PARADO
 // ------------------------------------------------------------
 function applyIdleAnimation() {
   if (!robot.idle) return;
@@ -116,7 +113,7 @@ function applyIdleAnimation() {
 }
 
 // ------------------------------------------------------------
-// RUN FORWARD
+// CORRIDA PARA A FRENTE
 // ------------------------------------------------------------
 function applyForwardRunAnimation() {
   if (robot.jumpHeaderActive || robot.kickActive) return;
@@ -129,13 +126,7 @@ function applyForwardRunAnimation() {
   const cosP = Math.cos(p);
   const cosOpp = Math.cos(p + Math.PI);
 
-  // --------------------------------------------------
-  // LEGS
-  // perna livre sobe bem mais
-  // perna de apoio mantém-se mais estável
-  // --------------------------------------------------
   const leftHipTarget = sinP >= 0 ? sinP * 0.66 : sinP * 0.22;
-
   const rightHipTarget = sinOpp >= 0 ? sinOpp * 0.66 : sinOpp * 0.22;
 
   const leftKneeTarget =
@@ -150,9 +141,6 @@ function applyForwardRunAnimation() {
   const rightAnkleTarget =
     -Math.max(0, sinOpp) * 0.4 + Math.max(0, -sinOpp) * 0.03 - cosOpp * 0.02;
 
-  // --------------------------------------------------
-  // ARMS
-  // --------------------------------------------------
   const leftShoulderTarget = -sinP * 0.78;
   const rightShoulderTarget = -sinOpp * 0.78;
 
@@ -162,16 +150,12 @@ function applyForwardRunAnimation() {
   const leftWristTarget = -sinP * 0.12;
   const rightWristTarget = -sinOpp * 0.12;
 
-  // --------------------------------------------------
-  // BODY
-  // --------------------------------------------------
   const torsoLeanTarget = -0.1;
   const headPitchTarget = 0.01;
   const headYawTarget = 0;
 
   robot.verticalOffset = Math.abs(Math.sin(p * 2.0)) * 0.8;
 
-  // ligeira oscilação da bacia, mas sem parecer salto
   robot.pelvisDrop = lerpValue(robot.pelvisDrop, 0.6, 0.1);
   robot.pelvisPitch = lerpValue(robot.pelvisPitch, -0.03, 0.1);
 
@@ -206,8 +190,9 @@ function applyForwardRunAnimation() {
   robot.leftThumbCurl = lerpValue(robot.leftThumbCurl, 0.16, 0.1);
   robot.rightThumbCurl = lerpValue(robot.rightThumbCurl, 0.16, 0.1);
 }
+
 // ------------------------------------------------------------
-// WALK BACKWARD
+// ANDAR PARA TRÁS
 // ------------------------------------------------------------
 function applyBackwardWalkAnimation() {
   if (robot.jumpHeaderActive || robot.kickActive) return;
@@ -218,7 +203,6 @@ function applyBackwardWalkAnimation() {
   const sinP = Math.sin(p);
   const sinOpp = Math.sin(p + Math.PI);
 
-  // shorter, more cautious backward movement
   const leftHipTarget = sinP >= 0 ? -sinP * 0.2 : -sinP * 0.12;
   const rightHipTarget = sinOpp >= 0 ? -sinOpp * 0.2 : -sinOpp * 0.12;
 
@@ -277,7 +261,7 @@ function applyBackwardWalkAnimation() {
 }
 
 // ------------------------------------------------------------
-// KICK
+// REMATE
 // ------------------------------------------------------------
 function triggerKick(leg = "right") {
   if (robot.kickActive || robot.jumpHeaderActive) return;
@@ -300,24 +284,20 @@ function updateKickAnimation() {
   robot.headYaw = lerpValue(robot.headYaw, 0, 0.1);
 
   if (robot.kickingLeg === "right") {
-    // balance arm movement
     robot.leftShoulder = lerpValue(robot.leftShoulder, -0.4, 0.18);
     robot.rightShoulder = lerpValue(robot.rightShoulder, 0.24, 0.18);
     robot.leftElbow = lerpValue(robot.leftElbow, 0.58, 0.18);
     robot.rightElbow = lerpValue(robot.rightElbow, 0.4, 0.18);
 
-    // support leg
     robot.leftHip = lerpValue(robot.leftHip, -0.08, 0.16);
     robot.leftKnee = lerpValue(robot.leftKnee, 0.2, 0.16);
     robot.leftAnkle = lerpValue(robot.leftAnkle, -0.05, 0.16);
 
     if (t < 0.3) {
-      // wind-up
       robot.rightHip = lerpValue(robot.rightHip, -0.62, 0.28);
       robot.rightKnee = lerpValue(robot.rightKnee, 0.82, 0.28);
       robot.rightAnkle = lerpValue(robot.rightAnkle, 0.1, 0.22);
     } else if (t < 0.62) {
-      // strike
       robot.rightHip = lerpValue(robot.rightHip, 0.52, 0.34);
       robot.rightKnee = lerpValue(robot.rightKnee, 0.06, 0.34);
       robot.rightAnkle = lerpValue(robot.rightAnkle, -0.18, 0.28);
@@ -326,7 +306,6 @@ function updateKickAnimation() {
         robot.ballAlreadyKicked = tryKickBall("right");
       }
     } else {
-      // recovery
       robot.rightHip = lerpValue(robot.rightHip, 0.02, 0.18);
       robot.rightKnee = lerpValue(robot.rightKnee, 0.12, 0.18);
       robot.rightAnkle = lerpValue(robot.rightAnkle, 0.0, 0.18);
@@ -376,7 +355,7 @@ function updateKickAnimation() {
 }
 
 // ------------------------------------------------------------
-// JUMP HEADER
+// CABECEAMENTO
 // ------------------------------------------------------------
 function triggerJumpHeader() {
   if (robot.jumpHeaderActive || robot.kickActive) return;
@@ -400,16 +379,9 @@ function updateJumpHeaderAnimation() {
 
   const t = robot.jumpHeaderPhase;
 
-  // neste salto não usamos queda artificial da bacia
   robot.pelvisDrop = 0;
   robot.pelvisPitch = 0;
 
-  // --------------------------------------------------
-  // 1) PREPARAÇÃO
-  // corpo inteiro baixa
-  // canelas quase verticais
-  // braços recuam bastante para dar impulso
-  // --------------------------------------------------
   if (t < 0.24) {
     const torsoLeanTarget = -0.2;
 
@@ -419,18 +391,16 @@ function updateJumpHeaderAnimation() {
     robot.headPitch = lerpValue(robot.headPitch, -0.04, 0.14);
     robot.headYaw = lerpValue(robot.headYaw, 0.0, 0.12);
 
-    // coxa dobra, canela mantém-se quase vertical
     applyGroundedHeaderLegPose(
-      0.65, // hipTarget
+      0.65,
       torsoLeanTarget,
-      0.02, // shinWorldTarget
-      0.0, // ankleTarget
+      0.02,
+      0.0,
       0.18,
       0.18,
       0.12,
     );
 
-    // braços bem para trás
     robot.leftShoulder = lerpValue(robot.leftShoulder, -0.95, 0.2);
     robot.rightShoulder = lerpValue(robot.rightShoulder, -0.95, 0.2);
 
@@ -439,14 +409,7 @@ function updateJumpHeaderAnimation() {
 
     robot.leftWrist = lerpValue(robot.leftWrist, -0.12, 0.14);
     robot.rightWrist = lerpValue(robot.rightWrist, 0.12, 0.14);
-  }
-
-  // --------------------------------------------------
-  // 2) IMPULSO
-  // extensão forte
-  // braços sobem para ajudar o salto
-  // --------------------------------------------------
-  else if (t < 0.42) {
+  } else if (t < 0.42) {
     const k = (t - 0.24) / 0.16;
     const jumpK = Math.sin(k * Math.PI * 0.5);
 
@@ -456,7 +419,6 @@ function updateJumpHeaderAnimation() {
     robot.headPitch = lerpValue(robot.headPitch, -0.1, 0.16);
     robot.headYaw = lerpValue(robot.headYaw, 0.0, 0.12);
 
-    // extensão quase total
     robot.leftHip = lerpValue(robot.leftHip, 0.1, 0.24);
     robot.rightHip = lerpValue(robot.rightHip, 0.1, 0.24);
 
@@ -466,7 +428,6 @@ function updateJumpHeaderAnimation() {
     robot.leftAnkle = lerpValue(robot.leftAnkle, 0.18, 0.18);
     robot.rightAnkle = lerpValue(robot.rightAnkle, 0.18, 0.18);
 
-    // braços sobem forte
     robot.leftShoulder = lerpValue(robot.leftShoulder, 0.68, 0.22);
     robot.rightShoulder = lerpValue(robot.rightShoulder, 0.68, 0.22);
 
@@ -475,23 +436,13 @@ function updateJumpHeaderAnimation() {
 
     robot.leftWrist = lerpValue(robot.leftWrist, 0.08, 0.14);
     robot.rightWrist = lerpValue(robot.rightWrist, -0.08, 0.14);
-  }
-
-  // --------------------------------------------------
-  // 3) TOPO / CABECEAMENTO
-  // mais tempo no ar e cabeceamento mais legível
-  // --------------------------------------------------
-  else if (t < 0.64) {
+  } else if (t < 0.64) {
     robot.verticalOffset = -38.0;
 
-    // em vez de inclinar para trás, fecha ligeiramente para a frente
     robot.torsoLean = lerpValue(robot.torsoLean, -0.1, 0.16);
-
-    // cabeça ataca mais a bola
     robot.headPitch = lerpValue(robot.headPitch, -0.66, 0.24);
     robot.headYaw = lerpValue(robot.headYaw, 0.0, 0.1);
 
-    // pernas fletem um pouco no ar
     robot.leftHip = lerpValue(robot.leftHip, 0.16, 0.12);
     robot.rightHip = lerpValue(robot.rightHip, 0.16, 0.12);
 
@@ -500,7 +451,7 @@ function updateJumpHeaderAnimation() {
 
     robot.leftAnkle = lerpValue(robot.leftAnkle, -0.1, 0.1);
     robot.rightAnkle = lerpValue(robot.rightAnkle, -0.1, 0.1);
-    // braços abertos
+
     robot.leftShoulder = lerpValue(robot.leftShoulder, 0.92, 0.16);
     robot.rightShoulder = lerpValue(robot.rightShoulder, 0.92, 0.16);
 
@@ -524,19 +475,12 @@ function updateJumpHeaderAnimation() {
     robot.rightThumbCurl = lerpValue(robot.rightThumbCurl, 0.02, 0.16);
 
     tryHeadBall();
-  }
-
-  // --------------------------------------------------
-  // 4) DESCIDA
-  // corpo mais direito antes do toque
-  // --------------------------------------------------
-  else if (t < 0.8) {
+  } else if (t < 0.8) {
     const k = (t - 0.64) / 0.2;
     const torsoLeanTarget = -0.02;
 
     robot.verticalOffset = lerpValue(-38.0, -6.0, k);
 
-    // torso mais direito
     robot.torsoLean = lerpValue(robot.torsoLean, torsoLeanTarget, 0.16);
     robot.headPitch = lerpValue(robot.headPitch, -0.1, 0.14);
     robot.headYaw = lerpValue(robot.headYaw, 0.0, 0.12);
@@ -547,7 +491,6 @@ function updateJumpHeaderAnimation() {
     robot.leftKnee = lerpValue(robot.leftKnee, 0.34, 0.14);
     robot.rightKnee = lerpValue(robot.rightKnee, 0.34, 0.14);
 
-    // pé já preparado para o toque
     robot.leftAnkle = lerpValue(robot.leftAnkle, 0.12, 0.16);
     robot.rightAnkle = lerpValue(robot.rightAnkle, 0.12, 0.16);
 
@@ -566,39 +509,24 @@ function updateJumpHeaderAnimation() {
 
     robot.leftWrist = lerpValue(robot.leftWrist, -0.08, 0.1);
     robot.rightWrist = lerpValue(robot.rightWrist, 0.08, 0.1);
-  }
-
-  // --------------------------------------------------
-  // 5) CONTACTO + ABSORÇÃO
-  // pés quase colados ao chão, joelhos fletem,
-  // quem desce mais é o tronco
-  // --------------------------------------------------
-  else if (t < 1.02) {
-    // depois do toque, não afundar a raiz toda
+  } else if (t < 1.02) {
     robot.verticalOffset = lerpValue(robot.verticalOffset, 10.0, 0.12);
 
-    // o torso é que baixa mais
     robot.torsoDrop = lerpValue(robot.torsoDrop, 16.0, 0.2);
 
     robot.torsoLean = lerpValue(robot.torsoLean, -0.12, 0.16);
     robot.headPitch = lerpValue(robot.headPitch, -0.03, 0.14);
     robot.headYaw = lerpValue(robot.headYaw, 0.0, 0.12);
 
-    // perna realmente flete
-    // perna flete mais e avança mais
     robot.leftHip = lerpValue(robot.leftHip, 0.52, 0.18);
     robot.rightHip = lerpValue(robot.rightHip, 0.52, 0.18);
 
     robot.leftKnee = lerpValue(robot.leftKnee, 0.92, 0.18);
     robot.rightKnee = lerpValue(robot.rightKnee, 0.92, 0.18);
 
-    // MUITO IMPORTANTE:
-    // acima de 0.08 para compensar o -0.08 fixo do pé
-    // e manter a sola plana
     robot.leftAnkle = lerpValue(robot.leftAnkle, 0.18, 0.22);
     robot.rightAnkle = lerpValue(robot.rightAnkle, 0.18, 0.22);
 
-    // braços à frente
     robot.leftShoulder = lerpValue(robot.leftShoulder, 0.26, 0.16);
     robot.rightShoulder = lerpValue(robot.rightShoulder, 0.26, 0.16);
 
@@ -620,13 +548,7 @@ function updateJumpHeaderAnimation() {
 
     robot.leftThumbCurl = lerpValue(robot.leftThumbCurl, 0.05, 0.12);
     robot.rightThumbCurl = lerpValue(robot.rightThumbCurl, 0.05, 0.12);
-  }
-
-  // --------------------------------------------------
-  // 6) RECUPERAÇÃO
-  // volta ao neutro
-  // --------------------------------------------------
-  else {
+  } else {
     robot.verticalOffset = lerpValue(robot.verticalOffset, 0.0, 0.14);
 
     robot.torsoLean = lerpValue(robot.torsoLean, 0.0, 0.1);
@@ -639,7 +561,6 @@ function updateJumpHeaderAnimation() {
     robot.leftKnee = lerpValue(robot.leftKnee, 0.08, 0.08);
     robot.rightKnee = lerpValue(robot.rightKnee, 0.08, 0.08);
 
-    // mantém o pé mais estável mais tempo
     robot.leftAnkle = lerpValue(robot.leftAnkle, 0.1, 0.1);
     robot.rightAnkle = lerpValue(robot.rightAnkle, 0.1, 0.1);
 
@@ -649,11 +570,10 @@ function updateJumpHeaderAnimation() {
     robot.leftShoulderSpread = lerpValue(robot.leftShoulderSpread, 0.0, 0.14);
     robot.rightShoulderSpread = lerpValue(robot.rightShoulderSpread, 0.0, 0.14);
 
-    // cotovelo recolhe mais rápido
     robot.leftElbow = lerpValue(robot.leftElbow, 0.22, 0.18);
     robot.rightElbow = lerpValue(robot.rightElbow, 0.22, 0.18);
     robot.torsoDrop = lerpValue(robot.torsoDrop, 0.0, 0.16);
-    // pulso acompanha rápido
+
     robot.leftWrist = lerpValue(robot.leftWrist, 0.0, 0.16);
     robot.rightWrist = lerpValue(robot.rightWrist, 0.0, 0.16);
 
@@ -674,6 +594,7 @@ function updateJumpHeaderAnimation() {
   }
 }
 
+// Ajusta as pernas durante a fase de preparação do salto
 function applyGroundedHeaderLegPose(
   hipTarget,
   torsoLeanTarget,
@@ -683,15 +604,6 @@ function applyGroundedHeaderLegPose(
   kneeLerp = 0.16,
   ankleLerp = 0.12,
 ) {
-  // Queremos:
-  // worldShinAngle ~= 0  (canela quase perpendicular ao chão)
-  //
-  // No teu rig:
-  // worldShinAngle ~= torsoLean + hipAngle - kneeAngle
-  //
-  // logo:
-  // kneeAngle = torsoLean + hipAngle - shinWorldTarget
-
   const kneeTarget = clampValue(
     hipTarget - torsoLeanTarget - shinWorldTarget,
     0.02,
@@ -709,7 +621,7 @@ function applyGroundedHeaderLegPose(
 }
 
 // ------------------------------------------------------------
-// BALL INTERACTION
+// INTERAÇÃO COM A BOLA
 // ------------------------------------------------------------
 function tryKickBall(leg) {
   if (!football) return false;
@@ -752,8 +664,7 @@ function tryHeadBall() {
 }
 
 // ------------------------------------------------------------
-// FOOT / HEAD WORLD POSITION HELPERS
-// Self-contained helpers to avoid missing references
+// POSIÇÃO APROXIMADA DO PÉ E DA CABEÇA
 // ------------------------------------------------------------
 function getFootWorldPosition(leg) {
   const left = leg === "left";
@@ -763,39 +674,30 @@ function getFootWorldPosition(leg) {
   const kneeAngle = left ? robot.leftKnee : robot.rightKnee;
   const ankleAngle = left ? robot.leftAnkle || 0 : robot.rightAnkle || 0;
 
-  // approximate lengths based on current geometry hierarchy
-  const upperLen = 65; // thighStart -> kneeMount
-  const lowerLen = 63; // shinStart -> ankleMount
-  const footLen = 18; // forward toe approximation
+  const upperLen = 65;
+  const lowerLen = 63;
+  const footLen = 18;
 
-  // hip position in local robot space
   const hipLocal = [17 * side, 96, 0];
 
-  // build sagittal-plane approximation
-  // leg points down in +Y, rotation around X affects Y/Z
   let y = hipLocal[1];
   let z = hipLocal[2];
 
-  // thigh
   y += Math.cos(hipAngle) * upperLen;
   z += Math.sin(hipAngle) * upperLen;
 
-  // shin: bottom.js should use rotateX(-kneeAngle), so the shin angle is hip - knee
   const shinAngle = hipAngle - kneeAngle;
   y += Math.cos(shinAngle) * lowerLen;
   z += Math.sin(shinAngle) * lowerLen;
 
-  // foot/toe direction: ankle adjustment, slight default boot pitch
   const footAngle = shinAngle + ankleAngle - 0.08;
   y += Math.sin(footAngle) * 2.0;
   z += Math.cos(footAngle) * footLen;
 
-  // rotate whole local point by torso lean around X
   const lean = robot.torsoLean || 0;
   const yLean = y * Math.cos(lean) - z * Math.sin(lean);
   const zLean = y * Math.sin(lean) + z * Math.cos(lean);
 
-  // rotate by yaw around Y
   const xWorld =
     robot.pos[0] +
     hipLocal[0] * Math.cos(robot.yaw) +
@@ -812,7 +714,6 @@ function getFootWorldPosition(leg) {
 }
 
 function getHeadWorldPosition() {
-  // approximate head/front forehead point
   const localX = 0;
   const localY = -90;
   const localZ = 24;
@@ -834,7 +735,7 @@ function getHeadWorldPosition() {
 }
 
 // ------------------------------------------------------------
-// FOOTBALL PHYSICS
+// FÍSICA SIMPLES DA BOLA
 // ------------------------------------------------------------
 function updateFootballPhysics() {
   if (!football) return;

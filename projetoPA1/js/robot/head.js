@@ -1,3 +1,8 @@
+// ------------------------------------------------------------
+// Desenha a cabeça a partir do tronco.
+// O pescoço é desenhado primeiro e depois a cabeça roda
+// em yaw e pitch sobre o pivot definido.
+// ------------------------------------------------------------
 function drawHead(root) {
   const neckBase = Mat4.compose(root, Mat4.translation(0, -58, 0));
   drawPart(robotMeshes.neck, neckBase, "skin");
@@ -18,6 +23,9 @@ function drawHead(root) {
   drawHeadFace(head);
 }
 
+// ------------------------------------------------------------
+// Desenha os vários blocos do cabelo.
+// ------------------------------------------------------------
 function drawHeadHair(headMatrix) {
   if (robotMeshes.hairTopBar) {
     const topBar = Mat4.compose(headMatrix, Mat4.translation(0, -25.5, -3.0));
@@ -40,6 +48,9 @@ function drawHeadHair(headMatrix) {
   }
 }
 
+// ------------------------------------------------------------
+// Desenha as orelhas com uma ligeira rotação para fora.
+// ------------------------------------------------------------
 function drawHeadEars(headMatrix) {
   if (!robotMeshes.ear) return;
 
@@ -59,6 +70,9 @@ function drawHeadEars(headMatrix) {
   drawPart(robotMeshes.ear, rightEar, "metal");
 }
 
+// ------------------------------------------------------------
+// Agrupa os elementos principais da cara.
+// ------------------------------------------------------------
 function drawHeadFace(headMatrix) {
   if (robotMeshes.visor) {
     const visor = Mat4.compose(headMatrix, Mat4.translation(0, -8.5, 22.0));
@@ -70,6 +84,9 @@ function drawHeadFace(headMatrix) {
   drawMoustache(headMatrix);
 }
 
+// ------------------------------------------------------------
+// LEDs frontais dos olhos.
+// ------------------------------------------------------------
 function drawHeadLeds(headMatrix) {
   if (!robotMeshes.eyeLed) return;
 
@@ -80,6 +97,9 @@ function drawHeadLeds(headMatrix) {
   drawPart(robotMeshes.eyeLed, rightEye, "led_blue");
 }
 
+// ------------------------------------------------------------
+// Nariz metálico frontal.
+// ------------------------------------------------------------
 function drawNose(headMatrix) {
   if (!robotMeshes.nose) return;
 
@@ -92,6 +112,9 @@ function drawNose(headMatrix) {
   drawPart(robotMeshes.nose, nose, "metal");
 }
 
+// ------------------------------------------------------------
+// Bigode frontal.
+// ------------------------------------------------------------
 function drawMoustache(headMatrix) {
   if (!robotMeshes.moustache) return;
 

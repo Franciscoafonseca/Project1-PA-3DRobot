@@ -1,8 +1,9 @@
-// js/textures.js
-// ============================================================
-// TEXTURE SYSTEM - CLEAN / CONSISTENT
-// ============================================================
+// ------------------------------------------------------------
+// ESTRUTURA CENTRAL DE TEXTURAS
+// ------------------------------------------------------------
 
+// Cada propriedade guarda uma imagem carregada com loadImage()
+// A separação por nome facilita a reutilização em várias partes do robot e da cena
 const Textures = {
   metal: null,
   metalPattern: null,
@@ -18,6 +19,12 @@ const Textures = {
   cimento: null,
 };
 
+// ------------------------------------------------------------
+// CARREGAMENTO DAS TEXTURAS
+// ------------------------------------------------------------
+
+// Esta funcao deve ser chamada durante a fase de preload
+// Cada imagem representa uma textura usada em materiais específicos do projeto
 function loadTextures() {
   Textures.metal = loadImage("assets/textures/metal.jpg");
   Textures.metalPattern = loadImage("assets/textures/metal-pattern.jpg");
@@ -28,30 +35,53 @@ function loadTextures() {
   Textures.skin = loadImage("assets/textures/skin.jpg");
   Textures.hair = loadImage("assets/textures/cabelo.jpg");
 
-  // azul -> camisola
+  // Tecido usado na camisola
   Textures.jersey = loadImage("assets/textures/tecido.jpg");
 
-  // branco -> calções
+  // Tecido usado nos calcoes
   Textures.shorts = loadImage("assets/textures/shorts.jpg");
 
-  // chuteira
+  // Material das sapatilhas
   Textures.boots = loadImage("assets/textures/lether.jpg");
 
   Textures.grass = loadImage("assets/textures/relva.jpg");
   Textures.cimento = loadImage("assets/textures/cimento.jpg");
 
-  // só deixa esta linha se o ficheiro existir mesmo
+  // Textura da bola
   Textures.football = loadImage("assets/textures/ball.jpg");
 }
 
+// ------------------------------------------------------------
+// CONFIGURACAO GLOBAL DO SISTEMA DE TEXTURAS
+// ------------------------------------------------------------
+
+// O modo REPEAT permite repetir a textura no objeto,
+// o que é especialmente útil na relva e no cimento.
 function setupTextureSystem() {
   textureWrap(REPEAT, REPEAT);
 }
 
+// ------------------------------------------------------------
+// APLICACAO DOS MATERIAIS
+// ------------------------------------------------------------
+
+// Esta função centraliza a lógica de materiais.
+// Recebe uma string identificadora e aplica:
+//
+// - textura, se existir
+// - material ambiente
+// - componente especular
+// - shininess
+// - emissão, quando necessário
+//
+// Retorna true quando e aplicada textura real ou false quando apenas e usada a cor/material.
 function applyMaterial(type) {
   noStroke();
 
   switch (type) {
+    // --------------------------------------------------------
+    // METAL
+    // --------------------------------------------------------
     case "metal":
       if (Textures.metal) {
         texture(Textures.metal);
@@ -65,6 +95,9 @@ function applyMaterial(type) {
       shininess(90);
       return false;
 
+    // --------------------------------------------------------
+    // PLASTICO
+    // --------------------------------------------------------
     case "plastic":
       if (Textures.plastic) {
         texture(Textures.plastic);
@@ -78,12 +111,18 @@ function applyMaterial(type) {
       shininess(18);
       return false;
 
+    // --------------------------------------------------------
+    // BANCOS DAS BANCADAS
+    // --------------------------------------------------------
     case "seat":
       ambientMaterial(0, 57, 164);
       specularMaterial(55, 55, 65);
       shininess(6);
       return false;
 
+    // --------------------------------------------------------
+    // VIDRO
+    // --------------------------------------------------------
     case "glass":
       if (Textures.glass) {
         texture(Textures.glass);
@@ -99,6 +138,9 @@ function applyMaterial(type) {
       shininess(20);
       return false;
 
+    // --------------------------------------------------------
+    // PELE
+    // --------------------------------------------------------
     case "skin":
       if (Textures.skin) {
         texture(Textures.skin);
@@ -112,6 +154,9 @@ function applyMaterial(type) {
       shininess(4);
       return false;
 
+    // --------------------------------------------------------
+    // CAMISOLA
+    // --------------------------------------------------------
     case "jersey":
       if (Textures.jersey) {
         texture(Textures.jersey);
@@ -125,6 +170,9 @@ function applyMaterial(type) {
       shininess(8);
       return false;
 
+    // --------------------------------------------------------
+    // CALCOES
+    // --------------------------------------------------------
     case "shorts":
       if (Textures.shorts) {
         texture(Textures.shorts);
@@ -138,6 +186,9 @@ function applyMaterial(type) {
       shininess(6);
       return false;
 
+    // --------------------------------------------------------
+    // SAPATILHAS
+    // --------------------------------------------------------
     case "boots":
       if (Textures.boots) {
         texture(Textures.boots);
@@ -151,6 +202,9 @@ function applyMaterial(type) {
       shininess(20);
       return false;
 
+    // --------------------------------------------------------
+    // BOLA
+    // --------------------------------------------------------
     case "football":
       if (Textures.football) {
         texture(Textures.football);
@@ -164,6 +218,9 @@ function applyMaterial(type) {
       shininess(18);
       return false;
 
+    // --------------------------------------------------------
+    // RELVA
+    // --------------------------------------------------------
     case "grass":
       if (Textures.grass) {
         texture(Textures.grass);
@@ -177,6 +234,9 @@ function applyMaterial(type) {
       shininess(2);
       return false;
 
+    // --------------------------------------------------------
+    // CIMENTO
+    // --------------------------------------------------------
     case "cimento":
       if (Textures.cimento) {
         texture(Textures.cimento);
@@ -190,6 +250,9 @@ function applyMaterial(type) {
       shininess(3);
       return false;
 
+    // --------------------------------------------------------
+    // CORPO DO HOLOFOTE
+    // --------------------------------------------------------
     case "floodlight_body":
       if (Textures.metalPattern) {
         texture(Textures.metalPattern);
@@ -210,6 +273,9 @@ function applyMaterial(type) {
       shininess(70);
       return false;
 
+    // --------------------------------------------------------
+    // LAMPADA DO HOLOFOTE
+    // --------------------------------------------------------
     case "floodlight_led":
       ambientMaterial(245, 245, 235);
       emissiveMaterial(255, 250, 210);
@@ -217,6 +283,9 @@ function applyMaterial(type) {
       shininess(22);
       return false;
 
+    // --------------------------------------------------------
+    // FRENTE DA BANCADA
+    // --------------------------------------------------------
     case "stand_front":
       if (Textures.cimento) {
         texture(Textures.cimento);
@@ -230,12 +299,18 @@ function applyMaterial(type) {
       shininess(2);
       return false;
 
+    // --------------------------------------------------------
+    // POSTE DA BANDEIRA
+    // --------------------------------------------------------
     case "corner_flag_pole":
       ambientMaterial(245, 245, 245);
       specularMaterial(90, 90, 90);
       shininess(18);
       return false;
 
+    // --------------------------------------------------------
+    // CABELO
+    // --------------------------------------------------------
     case "hair":
       if (Textures.hair) {
         texture(Textures.hair);
@@ -249,6 +324,10 @@ function applyMaterial(type) {
       shininess(10);
       return false;
 
+    // --------------------------------------------------------
+    // LED AZUL
+    // --------------------------------------------------------
+    // Material emissivo para dar aparencia de ser LED
     case "led_blue":
       ambientMaterial(120, 200, 255);
       emissiveMaterial(240, 252, 255);
@@ -256,6 +335,9 @@ function applyMaterial(type) {
       shininess(140);
       return false;
 
+    // --------------------------------------------------------
+    // MATERIAL POR OMISSAO
+    // --------------------------------------------------------
     default:
       ambientMaterial(170, 170, 170);
       specularMaterial(90, 90, 90);

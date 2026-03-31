@@ -1,7 +1,9 @@
 // js/input.js
 // ============================================================
-// INPUT SYSTEM
-// Controls robot movement, joints, kick, jump header, and camera
+// Sistema de input do projeto.
+// Guarda as teclas ativas e converte essas entradas em
+// movimento do robot, rotação de articulações e controlo
+// da câmara.
 // ============================================================
 
 const Input = {
@@ -23,14 +25,16 @@ const Input = {
 };
 
 // ------------------------------------------------------------
-// INIT
+// Inicialização do módulo de input.
+// Neste caso não é necessária configuração adicional.
 // ------------------------------------------------------------
 function initInput() {
-  // Nothing required for now.
+  // Nada a fazer aqui para já.
 }
 
 // ------------------------------------------------------------
-// KEY HELPERS
+// Helpers para verificar teclas ativas.
+// Um usa keyCode e outro usa o carácter.
 // ------------------------------------------------------------
 function isKeyDownCode(code) {
   return !!Input.keys[code];
@@ -41,8 +45,9 @@ function isKeyDownChar(ch) {
 }
 
 // ------------------------------------------------------------
-// EVENT HOOKS
-// Call these from sketch.js keyPressed/keyReleased
+// Regista uma tecla como pressionada.
+// Aqui também são tratadas ações instantâneas, como rematar,
+// saltar para cabeceamento ou repor a pose.
 // ------------------------------------------------------------
 function handleKeyPressed(k, keyCodeValue) {
   if (typeof k === "string") {
@@ -50,7 +55,6 @@ function handleKeyPressed(k, keyCodeValue) {
   }
   Input.keys[keyCodeValue] = true;
 
-  // one-shot actions
   if (k === " " || keyCodeValue === 32) {
     triggerKick("right");
   }
@@ -74,6 +78,9 @@ function handleKeyPressed(k, keyCodeValue) {
   }
 }
 
+// ------------------------------------------------------------
+// Marca a tecla como libertada.
+// ------------------------------------------------------------
 function handleKeyReleased(k, keyCodeValue) {
   if (typeof k === "string") {
     Input.keys[k.toLowerCase()] = false;
@@ -82,8 +89,7 @@ function handleKeyReleased(k, keyCodeValue) {
 }
 
 // ------------------------------------------------------------
-// MAIN UPDATE
-// Call this every frame inside draw()
+// Atualização principal do input por frame.
 // ------------------------------------------------------------
 function updateInput() {
   if (!robot) return;
@@ -94,7 +100,9 @@ function updateInput() {
 }
 
 // ------------------------------------------------------------
-// ROBOT MOVEMENT
+// Movimento global do robot.
+// W e S deslocam o robot na direção em que está virado.
+// A e D rodam o corpo no eixo Y.
 // ------------------------------------------------------------
 function updateRobotMovementInput() {
   const moveSpeed = Input.config.moveSpeed;
@@ -104,7 +112,7 @@ function updateRobotMovementInput() {
   robot.moving = false;
   robot.moveMode = "none";
 
-  // while jumping header, allow body rotation only
+  // Durante o cabeceamento só permito rodar o corpo
   if (robot.jumpHeaderActive) {
     if (isKeyDownChar("a")) {
       robot.yaw += rotateSpeed;
@@ -117,7 +125,6 @@ function updateRobotMovementInput() {
     return;
   }
 
-  // W = run forward
   if (isKeyDownChar("w")) {
     robot.pos[0] += Math.sin(robot.yaw) * moveSpeed;
     robot.pos[2] += Math.cos(robot.yaw) * moveSpeed;
@@ -125,7 +132,6 @@ function updateRobotMovementInput() {
     robot.moveMode = "forward";
   }
 
-  // S = walk backward
   if (isKeyDownChar("s")) {
     robot.pos[0] -= Math.sin(robot.yaw) * backwardSpeed;
     robot.pos[2] -= Math.cos(robot.yaw) * backwardSpeed;
@@ -133,7 +139,6 @@ function updateRobotMovementInput() {
     robot.moveMode = "backward";
   }
 
-  // A / D = rotate body
   if (isKeyDownChar("a")) {
     robot.yaw += rotateSpeed;
   }
@@ -144,15 +149,15 @@ function updateRobotMovementInput() {
 }
 
 // ------------------------------------------------------------
-// ROBOT JOINTS
-// Manual articulation controls
+// Controlo manual das articulações.
+// Serve para testar a hierarquia e ajustar poses sem depender
+// apenas das animações automáticas.
 // ------------------------------------------------------------
 function updateRobotJointInput() {
   const jointSpeed = Input.config.jointSpeed;
   const headSpeed = Input.config.headSpeed;
   const fingerSpeed = Input.config.fingerSpeed;
 
-  // Head yaw Q / E
   if (isKeyDownChar("q")) {
     robot.headYaw += headSpeed;
   }
@@ -161,7 +166,6 @@ function updateRobotJointInput() {
     robot.headYaw -= headSpeed;
   }
 
-  // Shoulders J / L
   if (isKeyDownChar("j")) {
     robot.leftShoulder -= jointSpeed;
     robot.rightShoulder += jointSpeed;
@@ -172,7 +176,6 @@ function updateRobotJointInput() {
     robot.rightShoulder -= jointSpeed;
   }
 
-  // Elbows I / K
   if (isKeyDownChar("i")) {
     robot.leftElbow += jointSpeed;
     robot.rightElbow += jointSpeed;
@@ -183,7 +186,6 @@ function updateRobotJointInput() {
     robot.rightElbow -= jointSpeed;
   }
 
-  // Wrists T / Y
   if (isKeyDownChar("t")) {
     robot.leftWrist += jointSpeed;
     robot.rightWrist += jointSpeed;
@@ -194,7 +196,6 @@ function updateRobotJointInput() {
     robot.rightWrist -= jointSpeed;
   }
 
-  // Hips U / O
   if (isKeyDownChar("u")) {
     robot.leftHip -= jointSpeed;
     robot.rightHip -= jointSpeed;
@@ -205,7 +206,6 @@ function updateRobotJointInput() {
     robot.rightHip += jointSpeed;
   }
 
-  // Knees N / M
   if (isKeyDownChar("n")) {
     robot.leftKnee += jointSpeed;
     robot.rightKnee += jointSpeed;
@@ -216,7 +216,6 @@ function updateRobotJointInput() {
     robot.rightKnee -= jointSpeed;
   }
 
-  // Ankles B / V
   if (isKeyDownChar("b")) {
     robot.leftAnkle += jointSpeed;
     robot.rightAnkle += jointSpeed;
@@ -227,7 +226,6 @@ function updateRobotJointInput() {
     robot.rightAnkle -= jointSpeed;
   }
 
-  // Fingers Z/X are now used by jump header, so use F/G for fingers
   if (isKeyDownChar("f")) {
     robot.leftFingerCurl += fingerSpeed;
     robot.rightFingerCurl += fingerSpeed;
@@ -246,9 +244,8 @@ function updateRobotJointInput() {
 }
 
 // ------------------------------------------------------------
-// CAMERA
-// Arrow keys orbit camera
-// 1 / 2 zoom
+// Controlo da câmara.
+// As setas orbitam a vista e as teclas 1/2 alteram a distância.
 // ------------------------------------------------------------
 function updateCameraInput() {
   if (typeof Scene === "undefined" || !Scene.camera) return;
@@ -286,7 +283,8 @@ function updateCameraInput() {
 }
 
 // ------------------------------------------------------------
-// LIMITS
+// Limita os ângulos das articulações.
+// Isto evita poses irreais e ajuda a manter o rig estável.
 // ------------------------------------------------------------
 function clampRobotJoints() {
   robot.headYaw = clampValue(robot.headYaw, -1.0, 1.0);
@@ -321,7 +319,7 @@ function clampRobotJoints() {
 }
 
 // ------------------------------------------------------------
-// SMALL UTILS
+// Utilitário simples para limitar valores num intervalo.
 // ------------------------------------------------------------
 function clampValue(v, minV, maxV) {
   return Math.max(minV, Math.min(maxV, v));

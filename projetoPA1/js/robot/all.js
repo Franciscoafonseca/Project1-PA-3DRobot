@@ -2,7 +2,11 @@ let robot = null;
 let robotMeshes = null;
 let football = null;
 
-//inicializacao
+// ------------------------------------------------------------
+// Inicializa o estado do robot e da bola.
+// Aqui ficam guardados os valores base de posição,
+// orientação, articulações e estados de animação.
+// ------------------------------------------------------------
 function initRobot() {
   robot = {
     pos: [0, -20, 0],
@@ -56,7 +60,7 @@ function initRobot() {
     jumpHeaderPhase: 0,
     _headerHitDone: false,
 
-    // importantes para a aterragem
+    // Ajustes usados sobretudo no salto e na aterragem
     pelvisDrop: 0,
     pelvisPitch: 0,
   };
@@ -70,7 +74,12 @@ function initRobot() {
   buildRobotMeshes();
 }
 
-//meshes
+// ------------------------------------------------------------
+// Cria todos os meshes do robot.
+// A geometria é preparada uma vez e depois reutilizada no draw,
+// o que mantém o código mais organizado e evita recriar malhas
+// em cada frame.
+// ------------------------------------------------------------
 function buildRobotMeshes() {
   robotMeshes = {
     torso: Geometry.makeChest(76, 106, 40),
@@ -83,12 +92,10 @@ function buildRobotMeshes() {
 
     shorts: Geometry.makeShortsAdvanced(70, 35, 33),
 
-    // ---------------- HEAD ----------------
     head: Geometry.makeStylizedRobotHead(52, 48, 44),
     neck: Geometry.makeRoundedTaperedPrism(10, 16, 20, 10, 14, 4.2, 20),
 
     visor: Geometry.makeRoundedPanel(32, 10, 2.8, 3.0, 0.1),
-
     eyeLed: Geometry.makeRoundedRectPrism(15, 6.2, 4, 1.2, 3),
 
     nose: Geometry.makeRoundedTaperedPrism(4.5, 7.0, 8.0, 3.0, 4.2, 3.2, 16),
@@ -106,7 +113,6 @@ function buildRobotMeshes() {
 
     ear: Geometry.makeRobotEar(7.5, 11, 7.5),
 
-    // estrutura do mullet a preencher a zona toda
     hairTopBar: Geometry.makeRoundedRectPrism(24, 7, 40, 1.8, 4),
     hairBackBar: Geometry.makeRoundedRectPrism(24, 50, 12, 1.8, 4),
     hairSideL: Geometry.makeRoundedRectPrism(4.2, 26, 18, 1.5, 4),
@@ -139,8 +145,11 @@ function buildRobotMeshes() {
   };
 }
 
-//robot draw
-
+// ------------------------------------------------------------
+// Desenha o robot completo.
+// Primeiro é criada a matriz raiz do corpo e depois são
+// desenhadas as várias partes com base nessa transformação.
+// ------------------------------------------------------------
 function drawRobot() {
   if (!robot || !robotMeshes) return;
 
@@ -154,9 +163,11 @@ function drawRobot() {
     Mat4.rotateX(robot.torsoLean),
   );
 
+  // Parte inferior
   const lowerBodyMatrix = Mat4.compose(root, Mat4.translation(0, 84, 0));
   drawLowerBody(lowerBodyMatrix);
 
+  // Tronco e parte superior
   const torsoMatrix = Mat4.compose(
     root,
     Mat4.translation(0, robot.torsoDrop || 0, 0),
@@ -169,7 +180,9 @@ function drawRobot() {
 }
 
 // ------------------------------------------------------------
-// DRAW HELPERS
+// Desenha um mesh já transformado para o espaço do mundo.
+// O material é aplicado aqui para centralizar a lógica de
+// desenho das peças.
 // ------------------------------------------------------------
 function drawPart(mesh, matrix, materialType = "metal") {
   const worldMesh = Mesh.transformed(mesh, matrix);
@@ -179,6 +192,12 @@ function drawPart(mesh, matrix, materialType = "metal") {
   Geometry.drawMesh(worldMesh, useTexture);
   pop();
 }
+
+// ------------------------------------------------------------
+// Desenha um painel.
+// Pode receber um painel composto por moldura + interior
+// ou um mesh simples.
+// ------------------------------------------------------------
 function drawPanel(
   panelObj,
   matrix,
@@ -190,7 +209,7 @@ function drawPanel(
     return;
   }
 
-  // Caso 1: painel composto { shell, inner }
+  // Painel com duas partes: exterior e interior
   if (panelObj.shell && panelObj.inner) {
     const outerWorld = Mesh.transformed(panelObj.shell, matrix);
     push();
@@ -206,7 +225,7 @@ function drawPanel(
     return;
   }
 
-  // Caso 2: mesh simples { vertices, triangles, uvs }
+  // Painel simples
   if (panelObj.vertices && panelObj.triangles) {
     const panelWorld = Mesh.transformed(panelObj, matrix);
     push();
@@ -219,6 +238,9 @@ function drawPanel(
   console.warn("drawPanel recebeu um panelObj inválido:", panelObj);
 }
 
+// ------------------------------------------------------------
+// Desenha a bola na posição atual.
+// ------------------------------------------------------------
 function drawFootball() {
   if (!football || !robotMeshes) return;
 
@@ -231,8 +253,10 @@ function drawFootball() {
   pop();
 }
 
-//reset
-
+// ------------------------------------------------------------
+// Repõe os valores principais do robot.
+// É útil para testes e para voltar à pose neutra.
+// ------------------------------------------------------------
 function resetRobotPose() {
   robot.pos[1] = -20;
   robot.baseY = -20;
@@ -284,6 +308,8 @@ function resetRobotPose() {
   robot.pelvisDrop = 0;
   robot.pelvisPitch = 0;
 }
+
+// Interpolação linear simples entre dois valores
 function lerpValue(a, b, t) {
   return a + (b - a) * t;
 }

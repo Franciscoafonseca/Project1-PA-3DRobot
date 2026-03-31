@@ -1,3 +1,8 @@
+// ------------------------------------------------------------
+// Desenha o painel traseiro e o número segmentado.
+// O painel é composto por uma base e por segmentos iluminados
+// para formar o algarismo pretendido.
+// ------------------------------------------------------------
 function drawBackPanel(torsoBody, number = 8) {
   const backPanelMatrix = Mat4.compose(
     torsoBody,
@@ -12,7 +17,7 @@ function drawBackPanel(torsoBody, number = 8) {
     const mesh =
       seg.type === "v" ? robotMeshes.backDigitV : robotMeshes.backDigitH;
 
-    // espelha no X para o número ficar correto nas costas
+    // O X é invertido para o número ficar corretamente orientado nas costas
     const m = Mat4.compose(digitBase, Mat4.translation(-seg.x, seg.y, 0));
 
     drawPart(mesh, m, "glass");
@@ -48,6 +53,10 @@ function drawBackPanel(torsoBody, number = 8) {
   }
 }
 
+// ------------------------------------------------------------
+// Desenha o tronco e os seus elementos principais.
+// Inclui peitorais, abdominais, zona inferior e painel traseiro.
+// ------------------------------------------------------------
 function drawTorso(root) {
   const torsoBody = Mat4.compose(root, Mat4.translation(0, 5, 0));
   drawPart(robotMeshes.torso, torsoBody, "jersey");
@@ -57,28 +66,20 @@ function drawTorso(root) {
     drawPart(robotMeshes.neckRing, neckRing, "metal");
   }
 
-  // // peitorais - maiores e a preencher o topo
-  // const pecL = Mat4.compose(torsoBody, Mat4.translation(-17.5, -34, 19.5));
-  // const pecR = Mat4.compose(torsoBody, Mat4.translation(17.5, -34, 19.5));
-  // drawPart(robotMeshes.pecL, pecL, "metal");
-  // drawPart(robotMeshes.pecR, pecR, "metal");
-  // peitorais grandes e alinhados com o topo do tronco
+  // Peitorais
   const pecL = Mat4.compose(torsoBody, Mat4.translation(-18.5, -36, 20.0));
   const pecR = Mat4.compose(torsoBody, Mat4.translation(18.5, -36, 20.0));
 
   drawPart(robotMeshes.pecL, pecL, "jersey");
   drawPart(robotMeshes.pecR, pecR, "jersey");
 
-  // 6-pack proporcional
-  // linha superior
+  // Abdominais distribuídos em três níveis
   const upperAbsL = Mat4.compose(torsoBody, Mat4.translation(-11, -7, 19.8));
   const upperAbsR = Mat4.compose(torsoBody, Mat4.translation(11, -7, 19.8));
 
-  // linha do meio
   const midAbsL = Mat4.compose(torsoBody, Mat4.translation(-10, 13, 19.0));
   const midAbsR = Mat4.compose(torsoBody, Mat4.translation(10, 13, 19.0));
 
-  // linha inferior
   const lowerAbsL = Mat4.compose(torsoBody, Mat4.translation(-9, 33, 18.0));
   const lowerAbsR = Mat4.compose(torsoBody, Mat4.translation(9, 33, 18.0));
 
@@ -91,7 +92,9 @@ function drawTorso(root) {
   drawPart(robotMeshes.lowerAbs, lowerAbsL, "jersey");
   drawPart(robotMeshes.lowerAbs, lowerAbsR, "jersey");
 
+  // Fecho inferior do tronco
   const lowerTorso = Mat4.compose(torsoBody, Mat4.translation(0, 55, 5));
   drawPart(robotMeshes.lowerTorso, lowerTorso, "metal");
+
   drawBackPanel(torsoBody, 7);
 }

@@ -1,5 +1,5 @@
 // ------------------------------------------------------------
-// PELVIS
+// Desenha a zona da bacia, caso exista mesh própria.
 // ------------------------------------------------------------
 function drawPelvis(pelvisMatrix) {
   const pelvisVisual = Mat4.compose(
@@ -13,7 +13,9 @@ function drawPelvis(pelvisMatrix) {
 }
 
 // ------------------------------------------------------------
-// LEG
+// Desenha uma perna completa.
+// A hierarquia segue a estrutura natural da articulação:
+// anca -> coxa -> joelho -> canela -> tornozelo -> pé.
 // ------------------------------------------------------------
 function drawLeg(pelvisMatrix, left) {
   const side = left ? -1 : 1;
@@ -26,39 +28,39 @@ function drawLeg(pelvisMatrix, left) {
   const kneeHeight = 12;
   const shinHeight = 58;
 
-  // anca
+  // Ligação da perna à bacia
   const hipMount = Mat4.compose(
     pelvisMatrix,
     Mat4.translation(17 * side, 10, 0),
   );
 
-  // a coxa é que deve receber o movimento principal
   const hipPivot = Mat4.compose(hipMount, Mat4.rotateX(hipAngle));
 
+  // Aba dos calções acompanhando a coxa
   drawShortsLegFlap(hipPivot, left);
 
-  // coxa
+  // Coxa
   const thighStart = Mat4.compose(hipPivot, Mat4.translation(0, 2, 0));
   drawPart(robotMeshes.thigh, thighStart, "skin");
 
-  // joelho
+  // Joelho
   const kneeMount = Mat4.compose(
     thighStart,
     Mat4.translation(0, thighHeight + 7, 0),
   );
   drawPart(robotMeshes.knee, kneeMount, "metal");
 
-  // joelho dobra a partir da coxa; manter sem offsets extra em Z
+  // A rotação do joelho é aplicada a partir deste pivot
   const kneePivot = Mat4.compose(kneeMount, Mat4.rotateX(-kneeAngle));
 
-  // canela
+  // Canela
   const shinStart = Mat4.compose(
     kneePivot,
     Mat4.translation(0, kneeHeight - 5, 0),
   );
   drawPart(robotMeshes.shin, shinStart, "skin");
 
-  // tornozelo
+  // Tornozelo e pé
   const ankleMount = Mat4.compose(
     shinStart,
     Mat4.translation(0, shinHeight + 5, 0),
@@ -71,17 +73,20 @@ function drawLeg(pelvisMatrix, left) {
 }
 
 // ------------------------------------------------------------
-// SHORTS
+// Parte superior dos calções.
+// É ligeiramente subida para fechar melhor a ligação ao tronco.
 // ------------------------------------------------------------
 function drawShortsWaist(pelvisMatrix) {
   if (!robotMeshes?.shorts?.waist) return;
 
-  // sobe ligeiramente a cintura para fechar melhor a zona com o torso
   const m = Mat4.compose(pelvisMatrix, Mat4.translation(0, -5.5, 0.0));
-
   drawPart(robotMeshes.shorts.waist, m, "shorts");
 }
 
+// ------------------------------------------------------------
+// Aba lateral do calção.
+// Fica presa à rotação da perna para acompanhar o movimento.
+// ------------------------------------------------------------
 function drawShortsLegFlap(hipPivot, left) {
   if (!robotMeshes?.shorts) return;
 
@@ -100,7 +105,7 @@ function drawShortsLegFlap(hipPivot, left) {
 }
 
 // ------------------------------------------------------------
-// LOWER BODY
+// Desenha a parte inferior completa do robot.
 // ------------------------------------------------------------
 function drawLowerBody(pelvisMatrix) {
   const pelvisBodyMatrix = pelvisMatrix;

@@ -1,7 +1,8 @@
 // ------------------------------------------------------------
-// ARM
+// Desenha um braço completo.
+// A transformação é hierárquica: ombro -> braço -> cotovelo
+// -> antebraço -> pulso -> mão -> dedos.
 // ------------------------------------------------------------
-
 function drawArm(torsoMatrix, left) {
   const side = left ? -1 : 1;
 
@@ -15,12 +16,13 @@ function drawArm(torsoMatrix, left) {
   const fingerCurl = left ? robot.leftFingerCurl : robot.rightFingerCurl;
   const thumbCurl = left ? robot.leftThumbCurl : robot.rightThumbCurl;
 
+  // Ponto de ligação do ombro ao tronco
   const shoulderMount = Mat4.compose(
     torsoMatrix,
     Mat4.translation(45 * side, -29, 0),
   );
 
-  // abre para FORA com o spread e depois aplica o swing principal
+  // O ombro combina abertura lateral com rotação principal
   const shoulderPivot = Mat4.compose(
     shoulderMount,
     Mat4.rotateZ(-side * shoulderSpread),
@@ -29,32 +31,28 @@ function drawArm(torsoMatrix, left) {
 
   drawPart(robotMeshes.shoulder, shoulderPivot, "metal");
 
-  // upper arm começa um pouco abaixo do ombro para a articulação respirar
+  // Braço superior
   const upperArm = Mat4.compose(shoulderPivot, Mat4.translation(0, 6.0, 0));
   drawPart(robotMeshes.upperArm, upperArm, "skin");
 
-  // cotovelo ligeiramente afastado do fim visual do upper arm
+  // Cotovelo
   const elbowMount = Mat4.compose(shoulderPivot, Mat4.translation(0, 58, 0));
   drawPart(robotMeshes.elbow, elbowMount, "metal");
 
-  // pequeno offset extra para o cotovelo "quebrar" melhor visualmente
   const elbowPivot = Mat4.compose(elbowMount, Mat4.rotateX(elbowAngle + 0.08));
 
-  // antebraço começa um pouco abaixo do cotovelo para não o tapar
+  // Antebraço
   const forearm = Mat4.compose(elbowPivot, Mat4.translation(0, 4, 0));
   drawPart(robotMeshes.forearm, forearm, "skin");
 
-  // pulso mais abaixo para aparecer entre antebraço e mão
+  // Pulso
   const wristMount = Mat4.compose(elbowPivot, Mat4.translation(0, 42, 0));
   drawPart(robotMeshes.wrist, wristMount, "metal");
 
-  // o pulso roda no eixo local da tua montagem;
-  // manter X aqui preserva os teus espaçamentos e evita destruir a mão
   const wristPivot = Mat4.compose(wristMount, Mat4.rotateX(wristAngle));
 
-  // mão um pouco mais abaixo para não engolir o pulso
+  // Base da mão
   const handBase = Mat4.compose(wristPivot, Mat4.translation(0, 9.0, 0));
-
   const handYaw = left ? Math.PI / 2 : -Math.PI / 2;
 
   const palm = Mat4.compose(
@@ -68,12 +66,13 @@ function drawArm(torsoMatrix, left) {
 }
 
 // ------------------------------------------------------------
-// FINGERS
+// Posiciona os quatro dedos principais e o polegar.
+// O lado esquerdo e direito são espelhados para manter
+// a simetria das mãos.
 // ------------------------------------------------------------
 function drawHandFingers(palmMatrix, left, fingerCurl, thumbCurl) {
   const side = left ? -1 : 1;
 
-  // espelha os dedos principais lateralmente para ficarem simétricos
   const indexBase = Mat4.compose(
     palmMatrix,
     Mat4.translation(-3.55 * side, 5.0, 1.15),
@@ -98,16 +97,13 @@ function drawHandFingers(palmMatrix, left, fingerCurl, thumbCurl) {
   );
   drawFinger(littleBase, fingerCurl, 6.8, 5.1, 3.7);
 
-  // polegar espelhado e com abertura consistente
   const thumbBase = Mat4.compose(
     palmMatrix,
     Mat4.translation(-3.3 * side, 0.9, 2.2),
   );
 
   const thumbOpen = Mat4.compose(thumbBase, Mat4.rotateZ(-0.92 * side));
-
   const thumbTilt = Mat4.compose(thumbOpen, Mat4.rotateY(0.26 * side));
-
   const thumbPivot = Mat4.compose(
     thumbTilt,
     Mat4.rotateX(thumbCurl * 0.72 + 0.12),
@@ -116,11 +112,18 @@ function drawHandFingers(palmMatrix, left, fingerCurl, thumbCurl) {
   drawFingerSegmentChain(thumbPivot, 5.2, 3.8, 0, 0.5);
 }
 
+// ------------------------------------------------------------
+// Cria a rotação base de um dedo e delega o resto da cadeia.
+// ------------------------------------------------------------
 function drawFinger(baseMatrix, curl, len1, len2, len3) {
   const basePivot = Mat4.compose(baseMatrix, Mat4.rotateX(curl));
   drawFingerSegmentChain(basePivot, len1, len2, len3, curl);
 }
 
+// ------------------------------------------------------------
+// Desenha a cadeia de segmentos de um dedo.
+// Cada falange é ligada por uma pequena articulação.
+// ------------------------------------------------------------
 function drawFingerSegmentChain(basePivot, len1, len2, len3, curl) {
   const seg1 = Mat4.compose(basePivot, Mat4.translation(0, len1 * 0.5, 0));
   drawPart(robotMeshes.fingerSegment, seg1, "skin");

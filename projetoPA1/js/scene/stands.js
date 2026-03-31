@@ -1,14 +1,19 @@
-// js/stands.js
-// ============================================================
-// STANDS SYSTEM
-// Bancadas, fechos laterais e bancos simplificados.
-// ============================================================
+// ------------------------------------------------------------
+// BANCADAS LATERAIS
+// ------------------------------------------------------------
 
+// Desenha as duas bancadas laterais
 function drawSideStands() {
   drawLongSideStand(true);
   drawLongSideStand(false);
 }
 
+// Esta função constrói uma bancada lateral por níveis.
+// Cada nível é formado por:
+// - corpo principal
+// - patamar superior
+// - frente do degrau
+// - fila de bancos
 function drawLongSideStand(leftSide) {
   const levels = Scene.stands.levels;
   const zStart = Scene.stands.zStart;
@@ -31,6 +36,7 @@ function drawLongSideStand(leftSide) {
     const x0 = Math.min(xFront, xBack);
     const x1 = Math.max(xFront, xBack);
 
+    // Corpo principal do degrau
     const bodyMesh = makeStandBlockMesh(
       x0,
       x1,
@@ -45,6 +51,7 @@ function drawLongSideStand(leftSide) {
     Geometry.drawMesh(bodyMesh, useBodyTexture);
     pop();
 
+    // Patamar superior do degrau
     let tx0, tx1;
     if (leftSide) {
       tx0 = xFront - treadDepth;
@@ -68,6 +75,7 @@ function drawLongSideStand(leftSide) {
     Geometry.drawMesh(treadMesh, useTopTexture);
     pop();
 
+    // Frente do degrau
     const frontThickness = 14;
     let fx0, fx1;
 
@@ -93,13 +101,20 @@ function drawLongSideStand(leftSide) {
     Geometry.drawMesh(frontMesh, useFrontTexture);
     pop();
 
-    // Banco simplificado: apenas um bloco por assento.
+    // Fila de bancos do nível atual
     drawSimpleSeatRowOnStand(leftSide, xFront, topY, zStart, zEnd);
   }
 
+  // Fecha as extremidades da bancada
   drawStandSideClosure(leftSide, zStart, zEnd);
 }
 
+// ------------------------------------------------------------
+// BANCADA TRASEIRA
+// ------------------------------------------------------------
+
+// A bancada atrás da baliza segue a mesma lógica,
+// mas a progressão faz-se em profundidade no eixo Z.
 function drawBackStands() {
   const levels = Scene.stands.backLevels;
   const stepHeight = Scene.stands.backStepHeight;
@@ -148,6 +163,12 @@ function drawBackStands() {
   }
 }
 
+// ------------------------------------------------------------
+// FILAS DE BANCOS LATERAIS
+// ------------------------------------------------------------
+
+// Calcula automaticamente quantos bancos cabem numa fila
+// lateral e distribui-os ao longo da bancada.
 function drawSimpleSeatRowOnStand(leftSide, xFront, topY, zStart, zEnd) {
   const cfg = Scene.stands;
 
@@ -178,6 +199,9 @@ function drawSimpleSeatRowOnStand(leftSide, xFront, topY, zStart, zEnd) {
   }
 }
 
+// ------------------------------------------------------------
+// FILA DE BANCOS DA BANCADA TRASEIRA
+// ------------------------------------------------------------
 function drawSimpleBackSeatRow(topY, zFront, x0, x1) {
   const cfg = Scene.stands;
 
@@ -205,6 +229,12 @@ function drawSimpleBackSeatRow(topY, zFront, x0, x1) {
   }
 }
 
+// ------------------------------------------------------------
+// FECHOS LATERAIS DAS BANCADAS
+// ------------------------------------------------------------
+
+// Esta função fecha as laterais com quads triangulados,
+// evitando que a estrutura fique "aberta" nas extremidades.
 function drawStandSideClosure(leftSide, zStart, zEnd) {
   const levels = Scene.stands.levels;
   const stepHeight = Scene.stands.stepHeight;
@@ -239,6 +269,13 @@ function drawStandSideClosure(leftSide, zStart, zEnd) {
   }
 }
 
+// ------------------------------------------------------------
+// QUAD TRIANGULADO
+// ------------------------------------------------------------
+
+// Gera manualmente um quadrilátero dividido em dois triângulos.
+// Esta abordagem está de acordo com o requisito do projeto de
+// usar triangulação explícita.
 function makeQuadMesh(a, b, c, d, uvScaleX = 1, uvScaleY = 1) {
   return Mesh.create(
     [a, b, c, d],
@@ -255,10 +292,18 @@ function makeQuadMesh(a, b, c, d, uvScaleX = 1, uvScaleY = 1) {
   );
 }
 
+// ------------------------------------------------------------
+// BLOCO 3D DA BANCADA
+// ------------------------------------------------------------
+// Nao foram usados mais bancos para nao crashar o programa, ja estava muito pesado
+// Esta funcao gera um paralelepípedo com UVs simples.
+// É a base geométrica usada para degraus, frentes e patamares.
 function makeStandBlockMesh(x0, x1, yTop, yBottom, z0, z1) {
   const dx = Math.abs(x1 - x0);
   const dz = Math.abs(z1 - z0);
 
+  // Escala UV proporcional ao tamanho do bloco
+  // para reduzir deformação da textura.
   const ux = Math.max(1, dx / 220);
   const uz = Math.max(1, dz / 220);
 
